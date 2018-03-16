@@ -106,7 +106,7 @@ int get_key(void) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-    printf("HBInjector v0.1\n\n");
+	printf("HBInjector v0.1\n\n");
 	printf("This will replace the near application with VitaShell\n");
 	printf("Backups will be stored in ux0:data/HBInjector\n");
 	printf("Icon layout will be reset\n\n");
