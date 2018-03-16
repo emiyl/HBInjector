@@ -103,18 +103,23 @@ int get_key(void) {
 	}
 }
 
-
-
-
-
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  printf("HBInjector v0.2\n\n");
+  printf("HBInjector v0.3\n\n");
 	printf("This will replace a system application with VitaShell\n");
 	printf("Backups will be stored in ux0:data/HBInjector\n");
 	printf("Icon layout will be reset\n\n");
 	printf("Press X to continue\n");
 	printf("Press any other key to exit\n\n");
+  char *titleid = (char *) malloc(100);
+  char *title = (char *) malloc(100);
+  char vara[255];
+  char varb[255];
+  char varc[255];
+  char vard[255];
+  char vare[255];
+  char varf[255];
+  char varg[255];
 	switch (get_key()) {
 	case SCE_CTRL_CROSS:
     printf("Press X to replace near with VitaShell\n");
@@ -124,173 +129,104 @@ int main(int argc, char *argv[]) {
     printf("Press any other key to exit\n\n");
     switch (get_key()) {
   	case SCE_CTRL_CROSS:
-  		printf("Mounting vs0 as RW\n");
-  		vshIoUmount(0x300, 0, 0, 0);
-  		_vshIoMount(0x300, 0, 2, malloc(0x100));
-
-  		sceIoMkdir("ux0:data/HBInjector", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/NPXS10000", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-  		if (cp("ux0:/data/HBInjector/NPXS10000/eboot.bin", "vs0:app/NPXS10000/eboot.bin") != 0)
-  			printf("Failed to backup NPXS10000\n");
-  		else
-  			printf("Backing up NPXS10000...\n");
-
-  		SceUID fd;
-  		fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-  		if (fd >= 0)
-  		{
-  			printf("Using app0:VitaShell.bin\n");
-  			sceIoRemove("vs0:app/NPXS10000/eboot.bin");
-  			if (cp("vs0:app/NPXS10000/eboot.bin", "app0:VitaShell.bin") >= 0)
-  				printf("Copied VitaShell to System\n");
-  			else
-  				printf("Failed to copy VitaShell to system\n");
-  		}
-  		else
-  		{
-  			printf("ERROR: VitaShell not found!\n");
-  		}
-
-  		printf("Rebuilding database...\n\n");
-  		sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-  		cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
-  		sceIoRemove("ur0:shell/db/app.db");
-
-    	printf("Press X to reboot\n");
-    	printf("Press any other key to exit\n\n");
-    	switch (get_key()) {
-    	case SCE_CTRL_CROSS:
-    		scePowerRequestColdReset();
-    	default:
-    		sceKernelExitProcess(0);
-    	}
+      strcpy(titleid, "NPXS10000");
+      strcpy(title, "near");
+      goto go;
   	case SCE_CTRL_CIRCLE:
-  		printf("Mounting vs0 as RW\n");
-  		vshIoUmount(0x300, 0, 0, 0);
-  		_vshIoMount(0x300, 0, 2, malloc(0x100));
-
-  		sceIoMkdir("ux0:data/HBInjector", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/NPXS10094", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-  		if (cp("ux0:/data/HBInjector/NPXS10094/eboot.bin", "vs0:app/NPXS10094/eboot.bin") != 0)
-  			printf("Failed to backup NPXS10094\n");
-  		else
-  			printf("Backing up NPXS10094...\n");
-
-  		fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-  		if (fd >= 0)
-  		{
-  			printf("Using app0:VitaShell.bin\n");
-  			sceIoRemove("vs0:app/NPXS10094/eboot.bin");
-  			if (cp("vs0:app/NPXS10094/eboot.bin", "app0:VitaShell.bin") >= 0)
-  				printf("Copied VitaShell to System\n");
-  			else
-  				printf("Failed to copy VitaShell to system\n");
-  		}
-  		else
-  		{
-  			printf("ERROR: VitaShell not found!\n");
-  		}
-
-  		printf("Rebuilding database...\n\n");
-  		sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-  		cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
-  		sceIoRemove("ur0:shell/db/app.db");
-
-    	printf("Press X to reboot\n");
-    	printf("Press any other key to exit\n\n");
-    	switch (get_key()) {
-    	case SCE_CTRL_CROSS:
-    		scePowerRequestColdReset();
-    	default:
-    		sceKernelExitProcess(0);
-    	}
+      strcpy(titleid, "NPXS10094");
+      strcpy(title, "Parental Controls");
+      goto go;
   	case SCE_CTRL_TRIANGLE:
-  		printf("Mounting vs0 as RW\n");
-  		vshIoUmount(0x300, 0, 0, 0);
-  		_vshIoMount(0x300, 0, 2, malloc(0x100));
-
-  		sceIoMkdir("ux0:data/HBInjector", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/NPXS10001", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-  		if (cp("ux0:/data/HBInjector/NPXS10001/eboot.bin", "vs0:app/NPXS10001/eboot.bin") != 0)
-  			printf("Failed to backup NPXS10001\n");
-  		else
-  			printf("Backing up NPXS10001...\n");
-
-  		fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-  		if (fd >= 0)
-  		{
-  			printf("Using app0:VitaShell.bin\n");
-  			sceIoRemove("vs0:app/NPXS10001/eboot.bin");
-  			if (cp("vs0:app/NPXS10001/eboot.bin", "app0:VitaShell.bin") >= 0)
-  				printf("Copied VitaShell to System\n");
-  			else
-  				printf("Failed to copy VitaShell to system\n");
-  		}
-  		else
-  		{
-  			printf("ERROR: VitaShell not found!\n");
-  		}
-
-  		printf("Rebuilding database...\n\n");
-  		sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-  		cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
-  		sceIoRemove("ur0:shell/db/app.db");
-
-    	printf("Press X to reboot\n");
-    	printf("Press any other key to exit\n\n");
-    	switch (get_key()) {
-    	case SCE_CTRL_CROSS:
-    		scePowerRequestColdReset();
-    	default:
-    		sceKernelExitProcess(0);
-    	}
+      strcpy(titleid, "NPXS10001");
+      strcpy(title, "Party");
+      goto go;
     case SCE_CTRL_SQUARE:
-  		printf("Mounting vs0 as RW\n");
-  		vshIoUmount(0x300, 0, 0, 0);
-  		_vshIoMount(0x300, 0, 2, malloc(0x100));
-
-  		sceIoMkdir("ux0:data/HBInjector", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/NPXS10091", 0777);
-  		sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-  		if (cp("ux0:/data/HBInjector/NPXS10091/eboot.bin", "vs0:app/NPXS10091/eboot.bin") != 0)
-  			printf("Failed to backup NPXS10091\n");
-  		else
-  			printf("Backing up NPXS10091...\n");
-
-  		fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-  		if (fd >= 0)
-  		{
-  			printf("Using app0:VitaShell.bin\n");
-  			sceIoRemove("vs0:app/NPXS10091/eboot.bin");
-  			if (cp("vs0:app/NPXS10091/eboot.bin", "app0:VitaShell.bin") >= 0)
-  				printf("Copied VitaShell to System\n");
-  			else
-  				printf("Failed to copy VitaShell to system\n");
-  		}
-  		else
-  		{
-  			printf("ERROR: VitaShell not found!\n");
-  		}
-
-  		printf("Rebuilding database...\n\n");
-  		sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-  		cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
-  		sceIoRemove("ur0:shell/db/app.db");
-
-    	printf("Press X to reboot\n");
-    	printf("Press any other key to exit\n\n");
-    	switch (get_key()) {
-    	case SCE_CTRL_CROSS:
-    		scePowerRequestColdReset();
-    	default:
-    		sceKernelExitProcess(0);
-    	}
+      strcpy(titleid, "NPXS10091");
+      strcpy(title, "Calendar");
+      goto go;
     default:
   		sceKernelExitProcess(0);
   	}
+    go:
+      snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
+      snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
+      snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
+      snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
+      snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
+      snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
+      snprintf(varg, sizeof(varg), "Backup of %s already exists\nPress X to overwrite\nPress any other key to cancel\n\n", title);
+      printf(varf);
+      get_key();
+
+      vshIoUmount(0x300, 0, 0, 0);
+      _vshIoMount(0x300, 0, 2, malloc(0x100));
+
+      sceIoMkdir("ux0:data/HBInjector", 0777);
+      sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
+      sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
+      SceUID fd;
+      if(access(varb, F_OK) != -1) {
+          printf(varg); /* Backup of title already exists\nPress X to overwrite\nPress any other key to cancel\n */
+          switch (get_key()) {
+        	case SCE_CTRL_CROSS:
+            if (cp(varb, varc) != 0) {  /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
+              printf(vard);  /* Failed to backup title */
+              printf("Exiting in 3 seconds...");
+              sceKernelDelayThread(3*1000000);
+    	        sceKernelExitProcess(0);
+            }
+            else
+              printf(vare); /* Backing up title... */
+            goto proceed;
+          default:
+        		sceKernelExitProcess(0);
+        	}
+      } else {
+        if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
+          printf(vard);  /* Failed to backup title */
+          printf("Exiting in 3 seconds...");
+          sceKernelDelayThread(3*1000000);
+	        sceKernelExitProcess(0);
+        }
+        else
+          printf(vare); /* Backing up title... */
+      }
+    proceed:
+      fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
+      if (fd >= 0)
+      {
+        printf("Copying VitaShell to System...\n");
+        sceIoRemove(varc); /* vs0:app/title/eboot.bin */
+        if (cp(varc, "app0:VitaShell.bin") >= 0) /* vs0:app/title/eboot.bin */
+          printf("Copied VitaShell to System\n\n");
+        else {
+          printf("Failed to copy VitaShell to system\n");
+          printf("Exiting in 3 seconds...");
+          sceKernelDelayThread(3*1000000);
+	        sceKernelExitProcess(0);
+        }
+      }
+      else
+      {
+        printf("ERROR: VitaShell not found!\n");
+        printf("Exiting in 3 seconds...");
+        sceKernelDelayThread(3*1000000);
+        sceKernelExitProcess(0);
+      }
+
+      printf("Rebuilding database...\n\n");
+      sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
+      cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
+      sceIoRemove("ur0:shell/db/app.db");
+
+      printf("Press X to reboot\n");
+      printf("Press any other key to exit\n\n");
+      switch (get_key()) {
+      case SCE_CTRL_CROSS:
+        scePowerRequestColdReset();
+      default:
+        sceKernelExitProcess(0);
+      }
 	default:
 		sceKernelExitProcess(0);
 	}
