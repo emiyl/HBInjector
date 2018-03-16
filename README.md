@@ -1,11 +1,6 @@
 # HBInjector
 
-Currently only puts VitaShell into the near app on Vita.
-
-## Todo
-
-- Support more system apps to replace with VitaShell
-- Support more homebrew apps to replace system apps
+Replaces System Apps with VitaShell. This stops them being lost when formatting. This is useful for HENkaku Enso on 3.65, as it is difficult to regain access to VitaShell again after a format.
 
 ## Credits
 
