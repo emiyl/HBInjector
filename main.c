@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
 	printf("Icon layout will be reset\n\n");
 	printf("Press X to continue\n");
 	printf("Press any other key to exit\n\n");
+
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
   char vara[255];
@@ -120,114 +121,204 @@ int main(int argc, char *argv[]) {
   char vare[255];
   char varf[255];
   char varg[255];
-	switch (get_key()) {
-	case SCE_CTRL_CROSS:
-    printf("Press X to replace near with VitaShell\n");
-    printf("Press O to replace Parental Controls with VitaShell\n");
-    printf("Press /\\ to replace Party with VitaShell\n");
-    printf("Press [] to replace Calendar with VitaShell\n");
-    printf("Press any other key to exit\n\n");
-    switch (get_key()) {
-  	case SCE_CTRL_CROSS:
-      strcpy(titleid, "NPXS10000");
-      strcpy(title, "near");
-      goto go;
-  	case SCE_CTRL_CIRCLE:
-      strcpy(titleid, "NPXS10094");
-      strcpy(title, "Parental Controls");
-      goto go;
-  	case SCE_CTRL_TRIANGLE:
-      strcpy(titleid, "NPXS10001");
-      strcpy(title, "Party");
-      goto go;
-    case SCE_CTRL_SQUARE:
-      strcpy(titleid, "NPXS10091");
-      strcpy(title, "Calendar");
-      goto go;
-    default:
-  		sceKernelExitProcess(0);
-  	}
-    go:
-      snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
-      snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
-      snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
-      snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
-      snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
-      snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
-      snprintf(varg, sizeof(varg), "Backup of %s already exists\nPress X to overwrite\nPress any other key to cancel\n\n", title);
-      printf(varf);
-      get_key();
 
-      vshIoUmount(0x300, 0, 0, 0);
-      _vshIoMount(0x300, 0, 2, malloc(0x100));
-
-      sceIoMkdir("ux0:data/HBInjector", 0777);
-      sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
-      sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-      SceUID fd;
-      if(access(varb, F_OK) != -1) {
-          printf(varg); /* Backup of title already exists\nPress X to overwrite\nPress any other key to cancel\n */
-          switch (get_key()) {
-        	case SCE_CTRL_CROSS:
-            if (cp(varb, varc) != 0) {  /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
-              printf(vard);  /* Failed to backup title */
-              printf("Exiting in 3 seconds...");
-              sceKernelDelayThread(3*1000000);
-    	        sceKernelExitProcess(0);
-            }
-            else
-              printf(vare); /* Backing up title... */
-            goto proceed;
+  switch (get_key()) {
+    case SCE_CTRL_CROSS:
+      one:
+        psvDebugScreenClear( COLOR_BLACK );
+        printf("HBInjector v1.0\n\n");
+        printf("Press X to replace near with VitaShell\n");
+        printf("Press O to replace Parental Controls with VitaShell\n");
+        printf("Press /\\ to replace Party with VitaShell\n");
+        printf("Press [] to replace Calendar with VitaShell\n");
+        printf("Press R to enter Restore Mode\n");
+        printf("Press any other key to exit\n\n");
+        switch (get_key()) {
+        	case SCE_CTRL_CROSS: {
+            strcpy(titleid, "NPXS10000");
+            strcpy(title, "near");
+            goto inject;
+          }
+        	case SCE_CTRL_CIRCLE: {
+            strcpy(titleid, "NPXS10094");
+            strcpy(title, "Parental Controls");
+            goto inject;
+          }
+        	case SCE_CTRL_TRIANGLE: {
+            strcpy(titleid, "NPXS10001");
+            strcpy(title, "Party");
+            goto inject;
+          }
+          case SCE_CTRL_SQUARE: {
+            strcpy(titleid, "NPXS10091");
+            strcpy(title, "Calendar");
+            goto inject;
+          }
+          case SCE_CTRL_RTRIGGER: {
+            goto two;
+          }
           default:
-        		sceKernelExitProcess(0);
-        	}
-      } else {
-        if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
-          printf(vard);  /* Failed to backup title */
-          printf("Exiting in 3 seconds...");
-          sceKernelDelayThread(3*1000000);
-	        sceKernelExitProcess(0);
-        }
-        else
-          printf(vare); /* Backing up title... */
-      }
-    proceed:
-      fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-      if (fd >= 0)
-      {
-        printf("Copying VitaShell to System...\n");
-        sceIoRemove(varc); /* vs0:app/title/eboot.bin */
-        if (cp(varc, "app0:VitaShell.bin") >= 0) /* vs0:app/title/eboot.bin */
-          printf("Copied VitaShell to System\n\n");
-        else {
-          printf("Failed to copy VitaShell to system\n");
-          printf("Exiting in 3 seconds...");
-          sceKernelDelayThread(3*1000000);
-	        sceKernelExitProcess(0);
-        }
-      }
-      else
-      {
-        printf("ERROR: VitaShell not found!\n");
-        printf("Exiting in 3 seconds...");
-        sceKernelDelayThread(3*1000000);
-        sceKernelExitProcess(0);
-      }
+            scePowerRequestColdReset();
+      	}
 
-      printf("Rebuilding database...\n\n");
-      sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-      cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
-      sceIoRemove("ur0:shell/db/app.db");
+        inject:
+          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
+          snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
+          snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
+          snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
+          snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
+          snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
+          snprintf(varg, sizeof(varg), "If it is not, delete ux0:data/HBInjector/%s/eboot.bin\n", titleid);
+          printf(varf);
+          get_key();
 
-      printf("Press X to reboot\n");
-      printf("Press any other key to exit\n\n");
-      switch (get_key()) {
-      case SCE_CTRL_CROSS:
-        scePowerRequestColdReset();
-      default:
-        sceKernelExitProcess(0);
-      }
-	default:
-		sceKernelExitProcess(0);
-	}
+          vshIoUmount(0x300, 0, 0, 0);
+          _vshIoMount(0x300, 0, 2, malloc(0x100));
+
+          sceIoMkdir("ux0:data/HBInjector", 0777);
+          sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
+          sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
+          SceUID fd;
+          if(access(varb, F_OK) != -1) {
+              printf("VitaShell already installed\n");
+              printf(varg);
+              printf("Press any key to exit");
+              get_key();
+              scePowerRequestColdReset();
+          } else {
+            if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
+              printf(vard);  /* Failed to backup title */
+              printf("Rebooting in 3 seconds...");
+              sceKernelDelayThread(3*1000000);
+              scePowerRequestColdReset();
+            }
+            else {
+              printf(vare); /* Backing up title... */
+            }
+          }
+          fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
+          if (fd >= 0) {
+            printf("Copying VitaShell to System...\n");
+            sceIoRemove(varc); /* vs0:app/title/eboot.bin */
+            if (cp(varc, "app0:VitaShell.bin") >= 0) { /* vs0:app/title/eboot.bin */
+              printf("Copied VitaShell to System\n\n");
+            } else {
+              printf("Failed to copy VitaShell to system\n");
+              printf("Rebooting in 3 seconds...");
+              sceKernelDelayThread(3*1000000);
+              scePowerRequestColdReset();
+            }
+          } else {
+            printf("ERROR: VitaShell not found!\n");
+            printf("Rebooting in 3 seconds...");
+            sceKernelDelayThread(3*1000000);
+            scePowerRequestColdReset();
+          }
+
+          printf("Rebuilding database...\n\n");
+          sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
+          cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
+          sceIoRemove("ur0:shell/db/app.db");
+
+          printf("Press any key to reboot\n\n");
+
+          switch (get_key()) {
+            default: {
+              scePowerRequestColdReset();
+            }
+          }
+
+      two:
+        psvDebugScreenClear( COLOR_BLACK );
+        printf("HBInjector v1.0\n\n");
+        printf("Press X to restore near\n");
+        printf("Press O to restore Parental Controls\n");
+        printf("Press /\\ to restore Party\n");
+        printf("Press [] to restore Calendar\n");
+        printf("Press L to enter Inject Mode\n");
+        printf("Press any other key to exit\n\n");
+        switch (get_key()) {
+        	case SCE_CTRL_CROSS: {
+            strcpy(titleid, "NPXS10000");
+            strcpy(title, "near");
+            goto restore;
+          }
+        	case SCE_CTRL_CIRCLE: {
+            strcpy(titleid, "NPXS10094");
+            strcpy(title, "Parental Controls");
+            goto restore;
+          }
+        	case SCE_CTRL_TRIANGLE: {
+            strcpy(titleid, "NPXS10001");
+            strcpy(title, "Party");
+            goto restore;
+          }
+          case SCE_CTRL_SQUARE: {
+            strcpy(titleid, "NPXS10091");
+            strcpy(title, "Calendar");
+            goto restore;
+          }
+          case SCE_CTRL_LTRIGGER: {
+            goto one;
+          }
+          default: {
+            scePowerRequestColdReset();
+          }
+      	}
+
+        restore:
+          snprintf(vara, sizeof(vara), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
+          snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
+          snprintf(varc, sizeof(varc), "Restoring %s to system...\n", title);
+          snprintf(vard, sizeof(vard), "Restored %s to system\n\n", title);
+          snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
+          snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
+          snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
+          printf(varg);
+          get_key();
+
+          vshIoUmount(0x300, 0, 0, 0);
+          _vshIoMount(0x300, 0, 2, malloc(0x100));
+
+          sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
+          fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:/data/HBInjector/title/eboot.bin */
+          if (fd >= 0) {
+            printf(varc); /* Restoring title to system... */
+            sceIoRemove(varb); /* vs0:app/title/eboot.bin */
+            if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
+              printf(vard); /* Restored title to system */
+              sceIoRemove(vara);
+            } else {
+              printf(vare); /* Failed to restore title to system */
+              printf("Rebooting in 3 seconds...");
+              vshIoUmount(0x300, 0, 0, 0);
+              sceKernelDelayThread(3*1000000);
+              scePowerRequestColdReset();
+            }
+          } else {
+            printf(varf); /* ERROR: title backup not found! */
+            printf("Rebooting in 3 seconds...");
+            vshIoUmount(0x300, 0, 0, 0);
+            scePowerRequestColdReset();
+          }
+
+          printf("Rebuilding database...\n\n");
+          sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
+          cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
+          sceIoRemove("ur0:shell/db/app.db");
+
+          printf("Press any key to reboot\n\n");
+
+          switch (get_key()) {
+            case SCE_CTRL_CROSS: {
+              scePowerRequestColdReset();
+            }
+            default: {
+              scePowerRequestColdReset();
+            }
+          }
+    default: {
+      scePowerRequestColdReset();
+    }
+  }
 }
