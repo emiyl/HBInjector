@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
           default:
             sceKernelExitProcess(0);
       	}
-          snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
+        snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
 
         inject:
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
