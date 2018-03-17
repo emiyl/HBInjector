@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
   const char *version = ("1.1") ;
   char vari[255];
   snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
+  snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
   printf(vari);
 	printf("This will replace a system application with VitaShell\n");
 	printf("Backups will be stored in ux0:data/HBInjector\n");
@@ -185,8 +186,7 @@ int main(int argc, char *argv[]) {
           snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
           snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
           snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
-          snprintf(varg, sizeof(varg), "If it is not, delete ux0:data/HBInjector/%s.flg\n", titleid);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
+          snprintf(varg, sizeof(varg), "If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
           printf(varf);
           get_key();
 
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
               vshIoUmount(0x300, 0, 0, 0);
               _vshIoMount(0x300, 0, 2, malloc(0x100));
               printf(vare); /* Backing up title... */
-              WriteFile(varh, 0, 1); /* ux0:data/HBInjector/titleid.flg */
+              WriteFile(varh, 0, 1); /* app0:titleid.flg */
             }
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
@@ -295,7 +295,6 @@ int main(int argc, char *argv[]) {
           snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
           snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
           snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
           printf(varg);
           get_key();
 
@@ -303,7 +302,7 @@ int main(int argc, char *argv[]) {
           _vshIoMount(0x300, 0, 2, malloc(0x100));
 
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-          fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:/data/HBInjector/title/eboot.bin */
+          fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:data/HBInjector/title/eboot.bin */
           if (fd >= 0) {
             printf(varc); /* Restoring title to system... */
             if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
@@ -311,14 +310,12 @@ int main(int argc, char *argv[]) {
             } else {
               printf(vare); /* Failed to restore title to system */
               printf("Rebooting in 3 seconds...");
-              vshIoUmount(0x300, 0, 0, 0);
               sceKernelDelayThread(3*1000000);
               scePowerRequestColdReset();
             }
           } else {
             printf(varf); /* ERROR: title backup not found! */
             printf("Rebooting in 3 seconds...");
-            vshIoUmount(0x300, 0, 0, 0);
             scePowerRequestColdReset();
           }
 
@@ -326,7 +323,7 @@ int main(int argc, char *argv[]) {
           sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
           cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
-          sceIoRemove(varh); /* ux0:data/HBInjector/titleid.flg */
+          sceIoRemove(varh); /* app0:titleid.flg */
 
           printf("Press any key to reboot\n\n");
 
