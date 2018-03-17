@@ -14,8 +14,7 @@
 #include "graphics.h"
 #define printf psvDebugScreenPrintf
 
-int cp(const char *to, const char *from)
-{
+int cp(const char *to, const char *from) {
     SceUID fd_to, fd_from;
     char buf[16*1024];
     ssize_t nread;
@@ -103,9 +102,23 @@ int get_key(void) {
 	}
 }
 
+int WriteFile(char *file, void *buf, int size) {
+	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+	if (fd < 0)
+		return fd;
+
+	int written = sceIoWrite(fd, buf, size);
+
+	sceIoClose(fd);
+	return written;
+}
+
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  printf("HBInjector v0.3\n\n");
+  const char *version = ("1.1") ;
+  char vari[255];
+  snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
+  printf(vari);
 	printf("This will replace a system application with VitaShell\n");
 	printf("Backups will be stored in ux0:data/HBInjector\n");
 	printf("Icon layout will be reset\n\n");
@@ -121,12 +134,13 @@ int main(int argc, char *argv[]) {
   char vare[255];
   char varf[255];
   char varg[255];
+  char varh[255];
 
   switch (get_key()) {
     case SCE_CTRL_CROSS:
       one:
         psvDebugScreenClear( COLOR_BLACK );
-        printf("HBInjector v1.0\n\n");
+        printf("HBInjector v1.1\n\n");
         printf("Press X to replace near with VitaShell\n");
         printf("Press O to replace Parental Controls with VitaShell\n");
         printf("Press /\\ to replace Party with VitaShell\n");
@@ -157,8 +171,11 @@ int main(int argc, char *argv[]) {
           case SCE_CTRL_RTRIGGER: {
             goto two;
           }
+          case SCE_CTRL_LTRIGGER: {
+            goto one;
+          }
           default:
-            scePowerRequestColdReset();
+            sceKernelExitProcess(0);
       	}
 
         inject:
@@ -168,32 +185,33 @@ int main(int argc, char *argv[]) {
           snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
           snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
           snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
-          snprintf(varg, sizeof(varg), "If it is not, delete ux0:data/HBInjector/%s/eboot.bin\n", titleid);
+          snprintf(varg, sizeof(varg), "If it is not, delete ux0:data/HBInjector/%s.flg\n", titleid);
+          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
           printf(varf);
           get_key();
-
-          vshIoUmount(0x300, 0, 0, 0);
-          _vshIoMount(0x300, 0, 2, malloc(0x100));
 
           sceIoMkdir("ux0:data/HBInjector", 0777);
           sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
           SceUID fd;
-          if(access(varb, F_OK) != -1) {
+          if(access(varh, F_OK) != -1) {
               printf("VitaShell already installed\n");
               printf(varg);
               printf("Press any key to exit");
               get_key();
-              scePowerRequestColdReset();
+              sceKernelExitProcess(0);
           } else {
             if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
               printf(vard);  /* Failed to backup title */
-              printf("Rebooting in 3 seconds...");
-              sceKernelDelayThread(3*1000000);
-              scePowerRequestColdReset();
+              printf("Press any key to exit");
+              get_key();
+              sceKernelExitProcess(0);
             }
             else {
+              vshIoUmount(0x300, 0, 0, 0);
+              _vshIoMount(0x300, 0, 2, malloc(0x100));
               printf(vare); /* Backing up title... */
+              WriteFile(varh, 0, 1); /* ux0:data/HBInjector/titleid.flg */
             }
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
@@ -230,7 +248,7 @@ int main(int argc, char *argv[]) {
 
       two:
         psvDebugScreenClear( COLOR_BLACK );
-        printf("HBInjector v1.0\n\n");
+        printf(vari);
         printf("Press X to restore near\n");
         printf("Press O to restore Parental Controls\n");
         printf("Press /\\ to restore Party\n");
@@ -261,19 +279,23 @@ int main(int argc, char *argv[]) {
           case SCE_CTRL_LTRIGGER: {
             goto one;
           }
+          case SCE_CTRL_RTRIGGER: {
+            goto two;
+          }
           default: {
-            scePowerRequestColdReset();
+            sceKernelExitProcess(0);
           }
       	}
 
         restore:
-          snprintf(vara, sizeof(vara), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
+          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s/eboot.bin", titleid);
           snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
           snprintf(varc, sizeof(varc), "Restoring %s to system...\n", title);
           snprintf(vard, sizeof(vard), "Restored %s to system\n\n", title);
           snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
           snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
           snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
+          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
           printf(varg);
           get_key();
 
@@ -304,7 +326,7 @@ int main(int argc, char *argv[]) {
           sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
           cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
-          sceIoRemove(vara);
+          sceIoRemove(varh); /* ux0:data/HBInjector/titleid.flg */
 
           printf("Press any key to reboot\n\n");
 
@@ -317,7 +339,7 @@ int main(int argc, char *argv[]) {
             }
           }
     default: {
-      scePowerRequestColdReset();
+      sceKernelExitProcess(0);
     }
   }
 }
