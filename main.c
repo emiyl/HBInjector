@@ -287,7 +287,6 @@ int main(int argc, char *argv[]) {
             sceIoRemove(vara); /* vs0:app/title/eboot.bin */
             if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
               printf(vard); /* Restored title to system */
-              sceIoRemove(vara);
             } else {
               printf(vare); /* Failed to restore title to system */
               printf("Rebooting in 3 seconds...");
@@ -306,6 +305,7 @@ int main(int argc, char *argv[]) {
           sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
           cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
+          sceIoRemove(vara);
 
           printf("Press any key to reboot\n\n");
 
