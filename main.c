@@ -118,7 +118,6 @@ int main(int argc, char *argv[]) {
   const char *version = ("1.1") ;
   char vari[255];
   snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
-  snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
   printf(vari);
 	printf("This will replace a system application with VitaShell\n");
 	printf("Backups will be stored in ux0:data/HBInjector\n");
@@ -178,6 +177,7 @@ int main(int argc, char *argv[]) {
           default:
             sceKernelExitProcess(0);
       	}
+          snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
 
         inject:
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
