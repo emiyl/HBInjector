@@ -284,7 +284,6 @@ int main(int argc, char *argv[]) {
           fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:/data/HBInjector/title/eboot.bin */
           if (fd >= 0) {
             printf(varc); /* Restoring title to system... */
-            sceIoRemove(vara); /* vs0:app/title/eboot.bin */
             if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
               printf(vard); /* Restored title to system */
             } else {
