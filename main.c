@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.1") ;
+  const char *version = ("1.11") ;
   char vari[255];
   snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
   printf(vari);
@@ -140,7 +140,9 @@ int main(int argc, char *argv[]) {
     case SCE_CTRL_CROSS:
       one:
         psvDebugScreenClear( COLOR_BLACK );
-        printf("HBInjector v1.1\n\n");
+        printf(vari);
+        printf(" ________   ___\n");
+        printf("/ Inject \\ / R \\\n");
         printf("Press X to replace near with VitaShell\n");
         printf("Press O to replace Parental Controls with VitaShell\n");
         printf("Press /\\ to replace Party with VitaShell\n");
@@ -249,6 +251,8 @@ int main(int argc, char *argv[]) {
       two:
         psvDebugScreenClear( COLOR_BLACK );
         printf(vari);
+        printf(" ___   _________\n");
+        printf("/ I \\ / Restore \\\n");
         printf("Press X to restore near\n");
         printf("Press O to restore Parental Controls\n");
         printf("Press /\\ to restore Party\n");
