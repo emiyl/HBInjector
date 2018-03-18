@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.20") ;
+  const char *version = ("1.2") ;
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
   char *selecttitlename = (char *) malloc(100);
