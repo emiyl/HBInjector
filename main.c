@@ -134,6 +134,8 @@ int main(int argc, char *argv[]) {
   char vary[255];
   sceIoMkdir("ux0:data/HBInjector", 0777);
   sceIoMkdir("ux0:data/HBInjector/flags", 0777);
+begin:
+  psvDebugScreenClear( COLOR_BLACK );
   snprintf(vari, sizeof(vari), "\n HBInjector v%s\n", version);
   printf(vari);
   printf(" ----------------\n\n");
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
 	printf(" Backups will be stored in ux0:data/HBInjector\n");
 	printf(" Icon layout will be reset\n\n");
 	printf(" Press X to continue\n");
-	printf(" Press any other key to exit\n\n");
+	printf(" Press O to exit\n\n");
 
   switch (get_key()) {
     case SCE_CTRL_CROSS:
@@ -437,9 +439,10 @@ int main(int argc, char *argv[]) {
           get_key();
           scePowerRequestColdReset();
           goto end;
-
-    default: {
+    case SCE_CTRL_CIRCLE:
       sceKernelExitProcess(0);
+    default: {
+      goto begin;
     }
   }
 end:
