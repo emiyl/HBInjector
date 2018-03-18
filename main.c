@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
           snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
           snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
           snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
-          snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
+          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
           printf(varg);
           get_key();
 
