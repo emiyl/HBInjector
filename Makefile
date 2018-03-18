@@ -15,6 +15,7 @@ all: $(TARGET).vpk
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin $@
 	zip -ur $@ VitaShell.bin
+	zip -ur $@ sce_sys
 
 eboot.bin: $(TARGET).velf
 	vita-make-fself $< $@
