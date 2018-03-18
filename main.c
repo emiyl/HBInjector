@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.2.2") ;
+  const char *version = ("1.2.3") ;
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
   char *selecttitlename = (char *) malloc(100);
@@ -332,18 +332,16 @@ begin:
           if(access(varh, F_OK) != -1) {
               printf(" VitaShell already installed\n");
               printf(varg);
-              printf(" Press any key to exit");
+              printf(" Press any key to cancel");
               get_key();
-              sceKernelExitProcess(0);
-              goto quit;
+              goto one;
           } else {
             if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
               printf(vard);  /* Failed to backup title */
-              printf(" Title likely doesn't exist");
-              printf(" Press any key to exit");
+              printf(" Title likely doesn't exist\n");
+              printf(" Press any key to cancel");
               get_key();
-              sceKernelExitProcess(0);
-              goto quit;
+              goto one;
             }
             else {
               vshIoUmount(0x300, 0, 0, 0);
@@ -359,7 +357,7 @@ begin:
               printf(" Copied VitaShell to System\n\n");
             } else {
               printf(" Failed to copy VitaShell to system\n");
-              printf(" Likely due to vs0 not mounting correctly");
+              printf(" Likely due to vs0 not mounting correctly\n");
               printf(" Press any key to reboot");
               get_key();
               scePowerRequestColdReset();
@@ -414,7 +412,7 @@ begin:
               printf(vard); /* Restored title to system */
             } else {
               printf(vare); /* Failed to restore title to system */
-              printf("Likely due to vs0 not mounting correctly");
+              printf(" Likely due to vs0 not mounting correctly\n");
               printf(" Press any key to reboot");
               get_key();
               scePowerRequestColdReset();
@@ -422,7 +420,7 @@ begin:
             }
           } else {
             printf(varf); /* ERROR: title backup not found! */
-            printf(" Likely due to vs0 not mounting correctly");
+            printf(" Likely due to vs0 not mounting correctly\n");
             printf(" Press any key to reboot");
             get_key();
             scePowerRequestColdReset();
@@ -447,6 +445,6 @@ begin:
   }
 end:
   scePowerRequestColdReset();
-quit:
-  sceKernelExitProcess(0);
+/* quit:
+  sceKernelExitProcess(0); */
 }
