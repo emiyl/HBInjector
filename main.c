@@ -122,16 +122,7 @@ int main(int argc, char *argv[]) {
   char *modename = (char *) malloc(100);
   int selecttitle = 0;
   int mode = 0;
-  char vara[255];
-  char varb[255];
-  char varc[255];
-  char vard[255];
-  char vare[255];
-  char varf[255];
-  char varg[255];
-  char varh[255];
-  char vari[255];
-  char vary[255];
+  char vara[255], varb[255], varc[255], vard[255], vare[255], varf[255], varg[255], varh[255], vari[255], vary[255];
   sceIoMkdir("ux0:data/HBInjector", 0777);
   sceIoMkdir("ux0:data/HBInjector/flags", 0777);
 begin:
