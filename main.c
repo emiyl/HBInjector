@@ -339,6 +339,7 @@ begin:
           } else {
             if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
               printf(vard);  /* Failed to backup title */
+              printf(" Title likely doesn't exist");
               printf(" Press any key to exit");
               get_key();
               sceKernelExitProcess(0);
@@ -358,6 +359,7 @@ begin:
               printf(" Copied VitaShell to System\n\n");
             } else {
               printf(" Failed to copy VitaShell to system\n");
+              printf(" Likely due to vs0 not mounting correctly");
               printf(" Press any key to reboot");
               get_key();
               scePowerRequestColdReset();
@@ -412,6 +414,7 @@ begin:
               printf(vard); /* Restored title to system */
             } else {
               printf(vare); /* Failed to restore title to system */
+              printf("Likely due to vs0 not mounting correctly");
               printf(" Press any key to reboot");
               get_key();
               scePowerRequestColdReset();
@@ -419,6 +422,7 @@ begin:
             }
           } else {
             printf(varf); /* ERROR: title backup not found! */
+            printf(" Likely due to vs0 not mounting correctly");
             printf(" Press any key to reboot");
             get_key();
             scePowerRequestColdReset();
