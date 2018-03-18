@@ -115,18 +115,13 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.13") ;
-  char vari[255];
-  snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
-  printf(vari);
-	printf("This will replace a system application with VitaShell\n");
-	printf("Backups will be stored in ux0:data/HBInjector\n");
-	printf("Icon layout will be reset\n\n");
-	printf("Press X to continue\n");
-	printf("Press any other key to exit\n\n");
-
+  const char *version = ("1.20") ;
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
+  char *selecttitlename = (char *) malloc(100);
+  char *modename = (char *) malloc(100);
+  int selecttitle = 0;
+  int mode = 0;
   char vara[255];
   char varb[255];
   char varc[255];
@@ -135,79 +130,216 @@ int main(int argc, char *argv[]) {
   char varf[255];
   char varg[255];
   char varh[255];
+  char vari[255];
+  char vary[255];
+  sceIoMkdir("ux0:data/HBInjector", 0777);
+  sceIoMkdir("ux0:data/HBInjector/flags", 0777);
+  snprintf(vari, sizeof(vari), "\n HBInjector v%s\n", version);
+  printf(vari);
+  printf(" ----------------\n\n");
+	printf(" This will replace a system application with VitaShell\n");
+	printf(" Backups will be stored in ux0:data/HBInjector\n");
+	printf(" Icon layout will be reset\n\n");
+	printf(" Press X to continue\n");
+	printf(" Press any other key to exit\n\n");
 
   switch (get_key()) {
     case SCE_CTRL_CROSS:
       one:
         psvDebugScreenClear( COLOR_BLACK );
         printf(vari);
-        printf(" ________   ___\n");
-        printf("/ Inject \\ / R \\\n");
-        printf("Press X to replace near with VitaShell\n");
-        printf("Press O to replace Parental Controls with VitaShell\n");
-        printf("Press /\\ to replace PS3 Remote Play with VitaShell\n");
-        printf("Press [] to replace Calendar with VitaShell\n");
-        printf("Press R to enter Restore Mode\n");
-        printf("Press any other key to exit\n\n");
+        printf(" ----------------\n\n");
+        if (selecttitle == 0) {
+          strcpy(selecttitlename, "near");
+          strcpy(titleid, "NPXS10000");
+          strcpy(title, selecttitlename);
+        } else {
+          if (selecttitle == 1) {
+            strcpy(selecttitlename, "Parental Controls");
+            strcpy(titleid, "NPXS10094");
+            strcpy(title, selecttitlename);
+          } else {
+            if (selecttitle == 2) {
+              strcpy(selecttitlename, "PS3 Remote Play");
+              strcpy(titleid, "NPXS10012");
+              strcpy(title, selecttitlename);
+            } else {
+              if (selecttitle == 3) {
+                strcpy(selecttitlename, "Photos");
+                strcpy(titleid, "NPXS10004");
+                strcpy(title, selecttitlename);
+              } else {
+                if (selecttitle == 4) {
+                  strcpy(selecttitlename, "Friends");
+                  strcpy(titleid, "NPXS10006");
+                  strcpy(title, selecttitlename);
+                } else {
+                  if (selecttitle == 5) {
+                    strcpy(selecttitlename, "Trophies");
+                    strcpy(titleid, "NPXS10008");
+                    strcpy(title, selecttitlename);
+                  } else {
+                    if (selecttitle == 6) {
+                      strcpy(selecttitlename, "Music");
+                      strcpy(titleid, "NPXS10009");
+                      strcpy(title, selecttitlename);
+                    } else {
+                      if (selecttitle == 7) {
+                        strcpy(selecttitlename, "Video");
+                        strcpy(titleid, "NPXS10010");
+                        strcpy(title, selecttitlename);
+                      } else {
+                        if (selecttitle == 8) {
+                          strcpy(selecttitlename, "PS4 Link");
+                          strcpy(titleid, "NPXS10013");
+                          strcpy(title, selecttitlename);
+                        } else {
+                          if (selecttitle == 9) {
+                            strcpy(selecttitlename, "Messages");
+                            strcpy(titleid, "NPXS10014");
+                            strcpy(title, selecttitlename);
+                          } else {
+                            if (selecttitle == 10) {
+                              strcpy(selecttitlename, "Mail");
+                              strcpy(titleid, "NPXS10072");
+                              strcpy(title, selecttitlename);
+                            } else {
+                              if (selecttitle == 11) {
+                                strcpy(selecttitlename, "Panoramic Camera");
+                                strcpy(titleid, "NPXS10095");
+                                strcpy(title, selecttitlename);
+                              } else {
+                                if (selecttitle == 12) {
+                                  strcpy(selecttitlename, "Calendar");
+                                    strcpy(titleid, "NPXS10091");
+                                    strcpy(title, selecttitlename);
+                                } else {
+                                  if (selecttitle < 0) {
+                                    selecttitle = 12;
+                                    strcpy(selecttitlename, "Calendar");
+                                    strcpy(titleid, "NPXS10091");
+                                    strcpy(title, selecttitlename);
+                                  }
+                                  else {
+                                    if (selecttitle > 12) {
+                                      selecttitle = 0;
+                                      strcpy(selecttitlename, "near");
+                                      strcpy(titleid, "NPXS10000");
+                                      strcpy(title, selecttitlename);
+                                    }
+                                    else {
+                                      strcpy(selecttitlename, "Unknown Title");
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        printf(" Select Title:\n\n");
+        printf(" < ");
+        printf(selecttitlename);
+        printf(" >\n\n");
+        printf(" Use the D-Pad to select a title\n Use the L and R buttons to change the mode");
+
+        if (mode == 0) {
+          strcpy(modename, "Inject ");
+        } else {
+          if (mode == 1) {
+            strcpy(modename, "Restore");
+          } else {
+            if (mode < 0) {
+              mode = 1;
+              strcpy(modename, "Restore");
+            }
+            else {
+              if (mode > 1) {
+                mode = 0;
+                strcpy(modename, "Inject ");
+              }
+              else
+                strcpy(modename, "Unknown Mode");
+            }
+          }
+        }
+        snprintf(vary, sizeof(vary), "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Mode: %s", modename);
+        printf(vary);
         switch (get_key()) {
         	case SCE_CTRL_CROSS: {
-            strcpy(titleid, "NPXS10000");
-            strcpy(title, "near");
-            goto inject;
+            if (mode == 0)
+              goto inject;
+            else {
+              if (mode == 1)
+                goto restore;
+              else
+                goto inject;
+            }
           }
-        	case SCE_CTRL_CIRCLE: {
-            strcpy(titleid, "NPXS10094");
-            strcpy(title, "Parental Controls");
-            goto inject;
+        	case SCE_CTRL_RIGHT: {
+            selecttitle = selecttitle + 1;
+            goto one;
           }
-        	case SCE_CTRL_TRIANGLE: {
-            strcpy(titleid, "NPXS10012");
-            strcpy(title, "PS3 Remote Play");
-            goto inject;
-          }
-          case SCE_CTRL_SQUARE: {
-            strcpy(titleid, "NPXS10091");
-            strcpy(title, "Calendar");
-            goto inject;
+        	case SCE_CTRL_LEFT: {
+            selecttitle = selecttitle - 1;
+            goto one;
           }
           case SCE_CTRL_RTRIGGER: {
-            goto two;
+            mode = mode + 1;
+            goto one;
           }
           case SCE_CTRL_LTRIGGER: {
+            mode = mode - 1;
             goto one;
           }
           default:
-            sceKernelExitProcess(0);
+            goto one;
       	}
+        goto one;
 
         inject:
+          psvDebugScreenClear( COLOR_BLACK );
+          printf(vari);
+          printf(" ----------------\n\n");
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
           snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
           snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(vard, sizeof(vard), "Failed to backup %s\n", title);
-          snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
-          snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
-          snprintf(varg, sizeof(varg), "If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
+          snprintf(vard, sizeof(vard), " Failed to backup %s\n", title);
+          snprintf(vare, sizeof(vare), " Backing up %s...\n\n", title);
+          snprintf(varf, sizeof(varf), " Installing VitaShell to %s\n Press X to continue\n Press O to go cancel\n\n", title);
+          snprintf(varg, sizeof(varg), " If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
+          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/flags/%s.flg", titleid);
           printf(varf);
-          get_key();
+          switch (get_key()) {
+          	case SCE_CTRL_CIRCLE: {
+              goto one;
+            }
+          }
 
-          sceIoMkdir("ux0:data/HBInjector", 0777);
           sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
           SceUID fd;
           if(access(varh, F_OK) != -1) {
-              printf("VitaShell already installed\n");
+              printf(" VitaShell already installed\n");
               printf(varg);
-              printf("Press any key to exit");
+              printf(" Press any key to exit");
               get_key();
               sceKernelExitProcess(0);
+              goto quit;
           } else {
             if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
               printf(vard);  /* Failed to backup title */
-              printf("Press any key to exit");
+              printf(" Press any key to exit");
               get_key();
               sceKernelExitProcess(0);
+              goto quit;
             }
             else {
               vshIoUmount(0x300, 0, 0, 0);
@@ -218,90 +350,55 @@ int main(int argc, char *argv[]) {
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
           if (fd >= 0) {
-            printf("Copying VitaShell to System...\n");
+            printf(" Copying VitaShell to System...\n");
             sceIoRemove(varc); /* vs0:app/title/eboot.bin */
             if (cp(varc, "app0:VitaShell.bin") >= 0) { /* vs0:app/title/eboot.bin */
-              printf("Copied VitaShell to System\n\n");
+              printf(" Copied VitaShell to System\n\n");
             } else {
-              printf("Failed to copy VitaShell to system\n");
-              printf("Rebooting in 3 seconds...");
-              sceKernelDelayThread(3*1000000);
-              scePowerRequestColdReset();
+              printf(" Failed to copy VitaShell to system\n");
+              printf(" Press any key to exit");
+              get_key();
+              vshIoUmount(0x300, 0, 0, 0);
+              sceKernelExitProcess(0);
+              goto quit;
             }
           } else {
-            printf("ERROR: VitaShell not found!\n");
-            printf("Rebooting in 3 seconds...");
-            sceKernelDelayThread(3*1000000);
-            scePowerRequestColdReset();
+            printf(" ERROR: VitaShell not found!\n");
+            printf(" Press any key to exit");
+            get_key();
+            vshIoUmount(0x300, 0, 0, 0);
+            sceKernelExitProcess(0);
+            goto quit;
           }
 
-          printf("Rebuilding database...\n\n");
+          printf(" Rebuilding database...\n\n");
           sceIoRemove("ux0:data/HBInjector/appdb/app.db");
           cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
 
-          printf("Press any key to reboot\n\n");
-
-          switch (get_key()) {
-            default: {
-              scePowerRequestColdReset();
-            }
-          }
-
-      two:
-        psvDebugScreenClear( COLOR_BLACK );
-        printf(vari);
-        printf(" ___   _________\n");
-        printf("/ I \\ / Restore \\\n");
-        printf("Press X to restore near\n");
-        printf("Press O to restore Parental Controls\n");
-        printf("Press /\\ to restore PS3 Remote Play\n");
-        printf("Press [] to restore Calendar\n");
-        printf("Press L to enter Inject Mode\n");
-        printf("Press any other key to exit\n\n");
-        switch (get_key()) {
-        	case SCE_CTRL_CROSS: {
-            strcpy(titleid, "NPXS10000");
-            strcpy(title, "near");
-            goto restore;
-          }
-        	case SCE_CTRL_CIRCLE: {
-            strcpy(titleid, "NPXS10094");
-            strcpy(title, "Parental Controls");
-            goto restore;
-          }
-        	case SCE_CTRL_TRIANGLE: {
-            strcpy(titleid, "NPXS10012");
-            strcpy(title, "PS3 Remote Play");
-            goto restore;
-          }
-          case SCE_CTRL_SQUARE: {
-            strcpy(titleid, "NPXS10091");
-            strcpy(title, "Calendar");
-            goto restore;
-          }
-          case SCE_CTRL_LTRIGGER: {
-            goto one;
-          }
-          case SCE_CTRL_RTRIGGER: {
-            goto two;
-          }
-          default: {
-            sceKernelExitProcess(0);
-          }
-      	}
+          printf(" Press any key to reboot\n\n");
+          get_key();
+          scePowerRequestColdReset();
+          goto end;
 
         restore:
+          psvDebugScreenClear( COLOR_BLACK );
+          printf(vari);
+          printf(" ----------------\n\n");
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s/eboot.bin", titleid);
           snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(varc, sizeof(varc), "Restoring %s to system...\n", title);
-          snprintf(vard, sizeof(vard), "Restored %s to system\n\n", title);
-          snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
-          snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
-          snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
+          snprintf(varc, sizeof(varc), " Restoring %s to system...\n", title);
+          snprintf(vard, sizeof(vard), " Restored %s to system\n\n", title);
+          snprintf(vare, sizeof(vare), " Failed to restore %s to system\n", title);
+          snprintf(varf, sizeof(varf), " ERROR: %s backup not found!\n", title);
+          snprintf(varg, sizeof(varg), " Restoring %s to system\n Press X to continue\n Press O to go cancel\n\n", title);
           snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
           printf(varg);
-          get_key();
+          switch (get_key()) {
+          	case SCE_CTRL_CIRCLE: {
+              goto one;
+            }
+          }
 
           vshIoUmount(0x300, 0, 0, 0);
           _vshIoMount(0x300, 0, 2, malloc(0x100));
@@ -314,34 +411,39 @@ int main(int argc, char *argv[]) {
               printf(vard); /* Restored title to system */
             } else {
               printf(vare); /* Failed to restore title to system */
-              printf("Rebooting in 3 seconds...");
-              sceKernelDelayThread(3*1000000);
-              scePowerRequestColdReset();
+              printf(" Press any key to exit");
+              get_key();
+              vshIoUmount(0x300, 0, 0, 0);
+              sceKernelExitProcess(0);
+              goto quit;
             }
           } else {
             printf(varf); /* ERROR: title backup not found! */
-            printf("Rebooting in 3 seconds...");
-            scePowerRequestColdReset();
+            vshIoUmount(0x300, 0, 0, 0);
+            printf(" Press any key to exit");
+            get_key();
+            vshIoUmount(0x300, 0, 0, 0);
+            sceKernelExitProcess(0);
+            goto quit;
           }
 
-          printf("Rebuilding database...\n\n");
+          printf(" Rebuilding database...\n\n");
           sceIoRemove("ux0:data/HBInjector/appdb/app.db");
           cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
           sceIoRemove(varh); /* app0:titleid.flg */
 
-          printf("Press any key to reboot\n\n");
+          printf(" Press any key to reboot\n\n");
+          get_key();
+          scePowerRequestColdReset();
+          goto end;
 
-          switch (get_key()) {
-            case SCE_CTRL_CROSS: {
-              scePowerRequestColdReset();
-            }
-            default: {
-              scePowerRequestColdReset();
-            }
-          }
     default: {
       sceKernelExitProcess(0);
     }
   }
+end:
+  scePowerRequestColdReset();
+quit:
+  sceKernelExitProcess(0);
 }
