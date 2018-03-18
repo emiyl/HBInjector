@@ -346,7 +346,7 @@ begin:
             }
             else {
               vshIoUmount(0x300, 0, 0, 0);
-              _vshIoMount(0x300, 0, 3, malloc(0x100));
+              _vshIoMount(0x300, 0, 2, malloc(0x100));
               printf(vare); /* Backing up title... */
             }
           }
@@ -402,7 +402,7 @@ begin:
           }
 
           vshIoUmount(0x300, 0, 0, 0);
-          _vshIoMount(0x300, 0, 3, malloc(0x100));
+          _vshIoMount(0x300, 0, 2, malloc(0x100));
 
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
           fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:data/HBInjector/title/eboot.bin */
