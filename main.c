@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.11") ;
+  const char *version = ("1.13") ;
   char vari[255];
   snprintf(vari, sizeof(vari), "HBInjector v%s\n\n", version);
   printf(vari);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
         printf("/ Inject \\ / R \\\n");
         printf("Press X to replace near with VitaShell\n");
         printf("Press O to replace Parental Controls with VitaShell\n");
-        printf("Press /\\ to replace Party with VitaShell\n");
+        printf("Press /\\ to replace PS3 Remote Play with VitaShell\n");
         printf("Press [] to replace Calendar with VitaShell\n");
         printf("Press R to enter Restore Mode\n");
         printf("Press any other key to exit\n\n");
@@ -161,8 +161,8 @@ int main(int argc, char *argv[]) {
             goto inject;
           }
         	case SCE_CTRL_TRIANGLE: {
-            strcpy(titleid, "NPXS10001");
-            strcpy(title, "Party");
+            strcpy(titleid, "NPXS10012");
+            strcpy(title, "PS3 Remote Play");
             goto inject;
           }
           case SCE_CTRL_SQUARE: {
@@ -179,7 +179,6 @@ int main(int argc, char *argv[]) {
           default:
             sceKernelExitProcess(0);
       	}
-        snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
 
         inject:
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
@@ -189,6 +188,7 @@ int main(int argc, char *argv[]) {
           snprintf(vare, sizeof(vare), "Backing up %s...\n\n", title);
           snprintf(varf, sizeof(varf), "Installing VitaShell to %s\nPress any key to continue\n\n", title);
           snprintf(varg, sizeof(varg), "If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
+          snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
           printf(varf);
           get_key();
 
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
               vshIoUmount(0x300, 0, 0, 0);
               _vshIoMount(0x300, 0, 2, malloc(0x100));
               printf(vare); /* Backing up title... */
-              WriteFile(varh, 0, 1); /* app0:titleid.flg */
+              WriteFile(varh, 0, 0); /* app0:titleid.flg */
             }
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
@@ -236,8 +236,8 @@ int main(int argc, char *argv[]) {
           }
 
           printf("Rebuilding database...\n\n");
-          sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-          cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
+          sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+          cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
 
           printf("Press any key to reboot\n\n");
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
         printf("/ I \\ / Restore \\\n");
         printf("Press X to restore near\n");
         printf("Press O to restore Parental Controls\n");
-        printf("Press /\\ to restore Party\n");
+        printf("Press /\\ to restore PS3 Remote Play\n");
         printf("Press [] to restore Calendar\n");
         printf("Press L to enter Inject Mode\n");
         printf("Press any other key to exit\n\n");
@@ -271,8 +271,8 @@ int main(int argc, char *argv[]) {
             goto restore;
           }
         	case SCE_CTRL_TRIANGLE: {
-            strcpy(titleid, "NPXS10001");
-            strcpy(title, "Party");
+            strcpy(titleid, "NPXS10012");
+            strcpy(title, "PS3 Remote Play");
             goto restore;
           }
           case SCE_CTRL_SQUARE: {
@@ -299,6 +299,7 @@ int main(int argc, char *argv[]) {
           snprintf(vare, sizeof(vare), "Failed to restore %s to system\n", title);
           snprintf(varf, sizeof(varf), "ERROR: %s backup not found!\n", title);
           snprintf(varg, sizeof(varg), "Restoring %s to system\nPress any key to continue\n\n", title);
+          snprintf(varh, sizeof(varh), "app0:%s.flg", titleid);
           printf(varg);
           get_key();
 
@@ -324,8 +325,8 @@ int main(int argc, char *argv[]) {
           }
 
           printf("Rebuilding database...\n\n");
-          sceIoRemove("ux0:data/HBInjector/appdb/app.db.bak");
-          cp("ux0:data/HBInjector/appdb/app.db.bak", "ur0:shell/db/app.db");
+          sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+          cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
           sceIoRemove(varh); /* app0:titleid.flg */
 
