@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.2") ;
+  const char *version = ("1.2.1") ;
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
   char *selecttitlename = (char *) malloc(100);
@@ -142,8 +142,9 @@ begin:
 	printf(" This will replace a system application with VitaShell\n");
 	printf(" Backups will be stored in ux0:data/HBInjector\n");
 	printf(" Icon layout will be reset\n\n");
+  printf(" If you are looking to install this before updating Enso on\n 3.65, remember that when updating all system apps are\n reset to stock, including HBInjected Applications\n\n");
 	printf(" Press X to continue\n");
-	printf(" Press O to exit\n\n");
+	printf(" Press O to exit\n");
 
   switch (get_key()) {
     case SCE_CTRL_CROSS:
@@ -345,9 +346,8 @@ begin:
             }
             else {
               vshIoUmount(0x300, 0, 0, 0);
-              _vshIoMount(0x300, 0, 2, malloc(0x100));
+              _vshIoMount(0x300, 0, 0, malloc(0x100));
               printf(vare); /* Backing up title... */
-              WriteFile(varh, 0, 1); /* app0:titleid.flg */
             }
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
@@ -358,25 +358,24 @@ begin:
               printf(" Copied VitaShell to System\n\n");
             } else {
               printf(" Failed to copy VitaShell to system\n");
-              printf(" Press any key to exit");
+              printf(" Press any key to reboot");
               get_key();
-              vshIoUmount(0x300, 0, 0, 0);
-              sceKernelExitProcess(0);
-              goto quit;
+              scePowerRequestColdReset();
+              goto end;
             }
           } else {
             printf(" ERROR: VitaShell not found!\n");
-            printf(" Press any key to exit");
+            printf(" Press any key to reboot");
             get_key();
-            vshIoUmount(0x300, 0, 0, 0);
-            sceKernelExitProcess(0);
-            goto quit;
+            scePowerRequestColdReset();
+            goto end;
           }
 
           printf(" Rebuilding database...\n\n");
           sceIoRemove("ux0:data/HBInjector/appdb/app.db");
           cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
+          WriteFile(varh, 0, 1); /* app0:titleid.flg */
 
           printf(" Press any key to reboot\n\n");
           get_key();
@@ -403,7 +402,7 @@ begin:
           }
 
           vshIoUmount(0x300, 0, 0, 0);
-          _vshIoMount(0x300, 0, 2, malloc(0x100));
+          _vshIoMount(0x300, 0, 0, malloc(0x100));
 
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
           fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:data/HBInjector/title/eboot.bin */
@@ -413,20 +412,17 @@ begin:
               printf(vard); /* Restored title to system */
             } else {
               printf(vare); /* Failed to restore title to system */
-              printf(" Press any key to exit");
+              printf(" Press any key to reboot");
               get_key();
-              vshIoUmount(0x300, 0, 0, 0);
-              sceKernelExitProcess(0);
-              goto quit;
+              scePowerRequestColdReset();
+              goto end;
             }
           } else {
             printf(varf); /* ERROR: title backup not found! */
-            vshIoUmount(0x300, 0, 0, 0);
-            printf(" Press any key to exit");
+            printf(" Press any key to reboot");
             get_key();
-            vshIoUmount(0x300, 0, 0, 0);
-            sceKernelExitProcess(0);
-            goto quit;
+            scePowerRequestColdReset();
+            goto end;
           }
 
           printf(" Rebuilding database...\n\n");
