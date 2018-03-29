@@ -129,7 +129,7 @@ begin:
   psvDebugScreenClear( COLOR_BLACK );
   snprintf(vari, sizeof(vari), "\n HBInjector v%s\n", version);
   printf(vari);
-  printf(" ----------------\n\n");
+  printf(" -----------------\n\n");
 	printf(" This will replace a system application with VitaShell\n");
 	printf(" Backups will be stored in ux0:data/HBInjector\n");
 	printf(" Icon layout will be reset\n\n");
@@ -142,7 +142,7 @@ begin:
       one:
         psvDebugScreenClear( COLOR_BLACK );
         printf(vari);
-        printf(" ----------------\n\n");
+        printf(" -----------------\n\n");
         if (selecttitle == 0) {
           strcpy(selecttitlename, "near");
           strcpy(titleid, "NPXS10000");
@@ -301,7 +301,7 @@ begin:
         inject:
           psvDebugScreenClear( COLOR_BLACK );
           printf(vari);
-          printf(" ----------------\n\n");
+          printf(" -----------------\n\n");
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
           snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
           snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
@@ -376,7 +376,7 @@ begin:
         restore:
           psvDebugScreenClear( COLOR_BLACK );
           printf(vari);
-          printf(" ----------------\n\n");
+          printf(" -----------------\n\n");
           snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s/eboot.bin", titleid);
           snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
           snprintf(varc, sizeof(varc), " Restoring %s to system...\n", title);
