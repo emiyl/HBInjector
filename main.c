@@ -115,7 +115,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
-  const char *version = ("1.2.4") ;
+  const char *version = ("1.2.5") ;
   char *titleid = (char *) malloc(100);
   char *title = (char *) malloc(100);
   char *selecttitlename = (char *) malloc(100);
@@ -133,6 +133,7 @@ begin:
 	printf(" This will replace a system application with VitaShell\n");
 	printf(" Backups will be stored in ux0:data/HBInjector\n");
 	printf(" Icon layout will be reset\n\n");
+	printf(" The system application selected will not be able to be\n used for its original purpose until you restore it\n\n");
   printf(" If you are looking to install this before updating Enso on\n 3.65, remember that when updating all system apps are\n reset to stock, including HBInjected Applications\n\n");
 	printf(" Press X to continue\n");
 	printf(" Press O to exit\n");
