@@ -98,7 +98,7 @@ int get_key(void) {
 			if (new & buttons[i])
 				return buttons[i];
 
-		sceKernelDelayThread(1000); // 1ms
+		sceKernelDelayThread(1000); // 1s
 	}
 }
 
