@@ -279,7 +279,6 @@ begin:
                 " Press any key to reboot"
               );
               get_key();
-              scePowerRequestColdReset();
               goto end;
             }
           } else {
@@ -288,7 +287,6 @@ begin:
                 " Press any key to reboot"
             );
             get_key();
-            scePowerRequestColdReset();
             goto end;
           }
 
@@ -300,7 +298,6 @@ begin:
 
           printf(" Press any key to reboot\n\n");
           get_key();
-          scePowerRequestColdReset();
           goto end;
 
         restore:
@@ -341,7 +338,6 @@ begin:
                 title
               );
               get_key();
-              scePowerRequestColdReset();
               goto end;
             }
           } else {
@@ -352,7 +348,6 @@ begin:
                 title
             );
             get_key();
-            scePowerRequestColdReset();
             goto end;
           }
 
@@ -364,7 +359,6 @@ begin:
 
           printf(" Press any key to reboot\n\n");
           get_key();
-          scePowerRequestColdReset();
           goto end;
     case SCE_CTRL_CIRCLE:
       sceKernelExitProcess(0);
@@ -374,6 +368,5 @@ begin:
   }
 end:
   scePowerRequestColdReset();
-/* quit:
-  sceKernelExitProcess(0); */
+  return 0;
 }
