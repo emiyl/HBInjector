@@ -167,7 +167,6 @@ begin:
         printf(vari);
         printf(" -----------------\n\n");
 
-        nTitle = WRAPVAL(nTitle, 0, TITLEMAX);
         strcpy(selecttitlename, TITLENAME(nTitle));
         strcpy(titleid, TITLEID(nTitle));
         strcpy(title, selecttitlename);
@@ -178,40 +177,33 @@ begin:
         printf(" >\n\n");
         printf(" Use the D-Pad to select a title\n Use the L and R buttons to change the mode");
 
-        mode = WRAPVAL(mode, 0, 1);
         strcpy(modename, mode == 0 ? "Inject" : "Restore");
 
         snprintf(vary, sizeof(vary), "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Mode: %s", modename);
         printf(vary);
         switch (get_key()) {
-        	case SCE_CTRL_CROSS: {
-            if (mode == 0)
-              goto inject;
-            else {
-              if (mode == 1)
-                goto restore;
-              else
-                goto inject;
-            }
-          }
-        	case SCE_CTRL_RIGHT: {
-            nTitle = nTitle + 1;
-            goto one;
-          }
-        	case SCE_CTRL_LEFT: {
-            nTitle = nTitle - 1;
-            goto one;
-          }
-          case SCE_CTRL_RTRIGGER: {
-            mode = mode + 1;
-            goto one;
-          }
-          case SCE_CTRL_LTRIGGER: {
-            mode = mode - 1;
-            goto one;
-          }
-          default:
-            goto one;
+            case SCE_CTRL_CROSS:
+                if (mode == 0)
+                    goto inject;
+                else
+                    goto restore;
+                break;
+
+            case SCE_CTRL_RIGHT:
+                nTitle = WRAPVAL(nTitle+1, 0, TITLEMAX);
+                goto one;
+
+            case SCE_CTRL_LEFT:
+                nTitle = WRAPVAL(nTitle-1, 0, TITLEMAX);
+                goto one;
+
+            case SCE_CTRL_RTRIGGER:
+            case SCE_CTRL_LTRIGGER:
+                mode = !mode;
+                goto one;
+
+            default:
+                goto one;
       	}
         goto one;
 
