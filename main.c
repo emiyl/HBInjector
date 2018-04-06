@@ -242,10 +242,10 @@ begin:
           SceUID fd;
           if(access(flagPath, F_OK) != -1) {
               printf(
-                " VitaShell already installed\n"
-                " If it is not, delete ux0:app/HBINJECT0/%s.flg\n"
+                " VitaShell is already installed\n"
+                " If not, delete %s\n"
                 " Press any key to cancel",
-                titleid
+                flagPath
               );
               get_key();
               goto one;
