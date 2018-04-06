@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
   char backupDir[255], backupPath[255], sysappPath[255], flagPath[255];
   sceIoMkdir("ux0:data/HBInjector", 0777);
   sceIoMkdir("ux0:data/HBInjector/flags", 0777);
-begin:
+
   psvDebugScreenClear( COLOR_BLACK );
   snprintf(header, sizeof(header), "\n HBInjector v%s\n -----------------\n\n", version);
   printf("%s%s",
@@ -168,7 +168,7 @@ begin:
     " Press O to exit\n"
   );
 
-  switch (get_key()) {
+  while(1) switch (get_key()) {
     case SCE_CTRL_CROSS:
       one:
         psvDebugScreenClear( COLOR_BLACK );
@@ -189,7 +189,7 @@ begin:
             header, selecttitlename, modename
         );
 
-        switch (get_key()) {
+        while(1) switch (get_key()) {
             case SCE_CTRL_CROSS:
                 if (mode == 0)
                     goto inject;
@@ -209,11 +209,7 @@ begin:
             case SCE_CTRL_LTRIGGER:
                 mode = !mode;
                 goto one;
-
-            default:
-                goto one;
       	}
-        goto one;
 
         inject:
           psvDebugScreenClear( COLOR_BLACK );
@@ -226,10 +222,16 @@ begin:
             header, title
           );
 
-          switch (get_key()) {
-          	case SCE_CTRL_CIRCLE: {
-              goto one;
+          while (1) {
+            switch(get_key()) {
+              case SCE_CTRL_CROSS:
+                break;
+              case SCE_CTRL_CIRCLE:
+                goto one;
+              default:
+                continue;
             }
+            break;
           }
 
           snprintf(backupDir, sizeof(backupDir), "ux0:data/HBInjector/%s", titleid);
@@ -311,10 +313,16 @@ begin:
             header, title
           );
 
-          switch (get_key()) {
-          	case SCE_CTRL_CIRCLE: {
-              goto one;
+          while (1) {
+            switch(get_key()) {
+              case SCE_CTRL_CROSS:
+                break;
+              case SCE_CTRL_CIRCLE:
+                goto one;
+              default:
+                continue;
             }
+            break;
           }
 
           snprintf(backupPath, sizeof(backupPath), "ux0:data/HBInjector/%s/eboot.bin", titleid);
@@ -360,11 +368,10 @@ begin:
           printf(" Press any key to reboot\n\n");
           get_key();
           goto end;
+
     case SCE_CTRL_CIRCLE:
       sceKernelExitProcess(0);
-    default: {
-      goto begin;
-    }
+      break;
   }
 end:
   scePowerRequestColdReset();
