@@ -138,10 +138,7 @@ int WriteFile(char *file, void *buf, int size) {
 int main(int argc, char *argv[]) {
 	psvDebugScreenInit();
   const char *version = ("1.2.5") ;
-  char *titleid = (char *) malloc(100);
-  char *title = (char *) malloc(100);
-  char *selecttitlename = (char *) malloc(100);
-  char *modename = (char *) malloc(100);
+  const char *titleid = "", *title = "";
   int nTitle = 0;
   int mode = 0;
   char header[255];
@@ -173,10 +170,8 @@ int main(int argc, char *argv[]) {
       one:
         psvDebugScreenClear( COLOR_BLACK );
 
-        strcpy(selecttitlename, TITLENAME(nTitle));
-        strcpy(titleid, TITLEID(nTitle));
-        strcpy(title, selecttitlename);
-        strcpy(modename, mode == 0 ? "Inject" : "Restore");
+        title = TITLENAME(nTitle);
+        titleid = TITLEID(nTitle);
 
         printf(
             " %s"
@@ -186,7 +181,7 @@ int main(int argc, char *argv[]) {
             " Use the L and R buttons to change the mode\n"
             "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
             " Mode: %s",
-            header, selecttitlename, modename
+            header, title, mode == 0 ? "Inject" : "Restore"
         );
 
         while(1) switch (get_key()) {
