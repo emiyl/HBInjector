@@ -12,7 +12,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include "graphics.h"
+
 #define printf psvDebugScreenPrintf
+#define WRAPVAL(v, min, max) (v < min ? max : v > max ? min : v)
 
 int cp(const char *to, const char *from) {
     SceUID fd_to, fd_from;
@@ -71,6 +73,26 @@ int cp(const char *to, const char *from) {
     return -1;
 }
 
+static const char* sysTitles[][2] = {
+    {"NPXS10000", "near"},
+    {"NPXS10094", "Parental Controls"},
+    {"NPXS10012", "PS3 Remote Play"},
+    {"NPXS10004", "Photos"},
+    {"NPXS10006", "Friends"},
+    {"NPXS10008", "Trophies"},
+    {"NPXS10009", "Music"},
+    {"NPXS10010", "Video"},
+    {"NPXS10013", "PS4 Link"},
+    {"NPXS10014", "Messages"},
+    {"NPXS10072", "Mail"},
+    {"NPXS10095", "Panoramic Camera"},
+    {"NPXS10091", "Calendar"},
+};
+
+#define TITLEID(n) sysTitles[n][0]
+#define TITLENAME(n) sysTitles[n][1]
+#define TITLEMAX sizeof(sysTitles) / sizeof(sysTitles[0]) - 1
+
 static unsigned buttons[] = {
 	SCE_CTRL_SELECT,
 	SCE_CTRL_START,
@@ -120,7 +142,7 @@ int main(int argc, char *argv[]) {
   char *title = (char *) malloc(100);
   char *selecttitlename = (char *) malloc(100);
   char *modename = (char *) malloc(100);
-  int selecttitle = 0;
+  int nTitle = 0;
   int mode = 0;
   char vara[255], varb[255], varc[255], vard[255], vare[255], varf[255], varg[255], varh[255], vari[255], vary[255];
   sceIoMkdir("ux0:data/HBInjector", 0777);
@@ -144,127 +166,21 @@ begin:
         psvDebugScreenClear( COLOR_BLACK );
         printf(vari);
         printf(" -----------------\n\n");
-        if (selecttitle == 0) {
-          strcpy(selecttitlename, "near");
-          strcpy(titleid, "NPXS10000");
-          strcpy(title, selecttitlename);
-        } else {
-          if (selecttitle == 1) {
-            strcpy(selecttitlename, "Parental Controls");
-            strcpy(titleid, "NPXS10094");
-            strcpy(title, selecttitlename);
-          } else {
-            if (selecttitle == 2) {
-              strcpy(selecttitlename, "PS3 Remote Play");
-              strcpy(titleid, "NPXS10012");
-              strcpy(title, selecttitlename);
-            } else {
-              if (selecttitle == 3) {
-                strcpy(selecttitlename, "Photos");
-                strcpy(titleid, "NPXS10004");
-                strcpy(title, selecttitlename);
-              } else {
-                if (selecttitle == 4) {
-                  strcpy(selecttitlename, "Friends");
-                  strcpy(titleid, "NPXS10006");
-                  strcpy(title, selecttitlename);
-                } else {
-                  if (selecttitle == 5) {
-                    strcpy(selecttitlename, "Trophies");
-                    strcpy(titleid, "NPXS10008");
-                    strcpy(title, selecttitlename);
-                  } else {
-                    if (selecttitle == 6) {
-                      strcpy(selecttitlename, "Music");
-                      strcpy(titleid, "NPXS10009");
-                      strcpy(title, selecttitlename);
-                    } else {
-                      if (selecttitle == 7) {
-                        strcpy(selecttitlename, "Video");
-                        strcpy(titleid, "NPXS10010");
-                        strcpy(title, selecttitlename);
-                      } else {
-                        if (selecttitle == 8) {
-                          strcpy(selecttitlename, "PS4 Link");
-                          strcpy(titleid, "NPXS10013");
-                          strcpy(title, selecttitlename);
-                        } else {
-                          if (selecttitle == 9) {
-                            strcpy(selecttitlename, "Messages");
-                            strcpy(titleid, "NPXS10014");
-                            strcpy(title, selecttitlename);
-                          } else {
-                            if (selecttitle == 10) {
-                              strcpy(selecttitlename, "Mail");
-                              strcpy(titleid, "NPXS10072");
-                              strcpy(title, selecttitlename);
-                            } else {
-                              if (selecttitle == 11) {
-                                strcpy(selecttitlename, "Panoramic Camera");
-                                strcpy(titleid, "NPXS10095");
-                                strcpy(title, selecttitlename);
-                              } else {
-                                if (selecttitle == 12) {
-                                  strcpy(selecttitlename, "Calendar");
-                                    strcpy(titleid, "NPXS10091");
-                                    strcpy(title, selecttitlename);
-                                } else {
-                                  if (selecttitle < 0) {
-                                    selecttitle = 12;
-                                    strcpy(selecttitlename, "Calendar");
-                                    strcpy(titleid, "NPXS10091");
-                                    strcpy(title, selecttitlename);
-                                  }
-                                  else {
-                                    if (selecttitle > 12) {
-                                      selecttitle = 0;
-                                      strcpy(selecttitlename, "near");
-                                      strcpy(titleid, "NPXS10000");
-                                      strcpy(title, selecttitlename);
-                                    }
-                                    else {
-                                      strcpy(selecttitlename, "Unknown Title");
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+
+        nTitle = WRAPVAL(nTitle, 0, TITLEMAX);
+        strcpy(selecttitlename, TITLENAME(nTitle));
+        strcpy(titleid, TITLEID(nTitle));
+        strcpy(title, selecttitlename);
+
         printf(" Select Title:\n\n");
         printf(" < ");
         printf(selecttitlename);
         printf(" >\n\n");
         printf(" Use the D-Pad to select a title\n Use the L and R buttons to change the mode");
 
-        if (mode == 0) {
-          strcpy(modename, "Inject ");
-        } else {
-          if (mode == 1) {
-            strcpy(modename, "Restore");
-          } else {
-            if (mode < 0) {
-              mode = 1;
-              strcpy(modename, "Restore");
-            }
-            else {
-              if (mode > 1) {
-                mode = 0;
-                strcpy(modename, "Inject ");
-              }
-              else
-                strcpy(modename, "Unknown Mode");
-            }
-          }
-        }
+        mode = WRAPVAL(mode, 0, 1);
+        strcpy(modename, mode == 0 ? "Inject" : "Restore");
+
         snprintf(vary, sizeof(vary), "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Mode: %s", modename);
         printf(vary);
         switch (get_key()) {
@@ -279,11 +195,11 @@ begin:
             }
           }
         	case SCE_CTRL_RIGHT: {
-            selecttitle = selecttitle + 1;
+            nTitle = nTitle + 1;
             goto one;
           }
         	case SCE_CTRL_LEFT: {
-            selecttitle = selecttitle - 1;
+            nTitle = nTitle - 1;
             goto one;
           }
           case SCE_CTRL_RTRIGGER: {
