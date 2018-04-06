@@ -322,7 +322,7 @@ int main(int argc, char *argv[]) {
 
           snprintf(backupPath, sizeof(backupPath), "ux0:data/HBInjector/%s/eboot.bin", titleid);
           snprintf(sysappPath, sizeof(sysappPath), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/%s.flg", titleid);
+          snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/flags/%s.flg", titleid);
 
           vshIoUmount(0x300, 0, 0, 0);
           _vshIoMount(0x300, 0, 2, malloc(0x100));
