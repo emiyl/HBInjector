@@ -144,43 +144,51 @@ int main(int argc, char *argv[]) {
   char *modename = (char *) malloc(100);
   int nTitle = 0;
   int mode = 0;
-  char vara[255], varb[255], varc[255], vard[255], vare[255], varf[255], varg[255], varh[255], vari[255], vary[255];
+  char header[255];
+  char backupDir[255], backupPath[255], sysappPath[255], flagPath[255];
   sceIoMkdir("ux0:data/HBInjector", 0777);
   sceIoMkdir("ux0:data/HBInjector/flags", 0777);
 begin:
   psvDebugScreenClear( COLOR_BLACK );
-  snprintf(vari, sizeof(vari), "\n HBInjector v%s\n", version);
-  printf(vari);
-  printf(" -----------------\n\n");
-	printf(" This will replace a system application with VitaShell\n");
-	printf(" Backups will be stored in ux0:data/HBInjector\n");
-	printf(" Icon layout will be reset\n\n");
-	printf(" The system application selected will not be able to be\n used for its original purpose until you restore it\n\n");
-  printf(" If you are looking to install this before updating Enso on\n 3.65, remember that when updating all system apps are\n reset to stock, including HBInjected Applications\n\n");
-	printf(" Press X to continue\n");
-	printf(" Press O to exit\n");
+  snprintf(header, sizeof(header), "\n HBInjector v%s\n -----------------\n\n", version);
+  printf("%s%s",
+    header,
+    " This will replace a system application with VitaShell\n"
+    " Backups will be stored in ux0:data/HBInjector\n"
+    " Icon layout will be reset\n"
+    "\n"
+    " The system application selected will not be able to be\n"
+    " used for its original purpose until you restore it\n"
+    "\n"
+    " If you are looking to install this before updating Enso on\n"
+    " 3.65, remember that when updating all system apps are\n"
+    " reset to stock, including HBInjected Applications\n"
+    "\n"
+    " Press X to continue\n"
+    " Press O to exit\n"
+  );
 
   switch (get_key()) {
     case SCE_CTRL_CROSS:
       one:
         psvDebugScreenClear( COLOR_BLACK );
-        printf(vari);
-        printf(" -----------------\n\n");
 
         strcpy(selecttitlename, TITLENAME(nTitle));
         strcpy(titleid, TITLEID(nTitle));
         strcpy(title, selecttitlename);
-
-        printf(" Select Title:\n\n");
-        printf(" < ");
-        printf(selecttitlename);
-        printf(" >\n\n");
-        printf(" Use the D-Pad to select a title\n Use the L and R buttons to change the mode");
-
         strcpy(modename, mode == 0 ? "Inject" : "Restore");
 
-        snprintf(vary, sizeof(vary), "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Mode: %s", modename);
-        printf(vary);
+        printf(
+            " %s"
+            " Select Title:\n\n"
+            " < %s >\n\n"
+            " Use the D-Pad to select a title\n"
+            " Use the L and R buttons to change the mode\n"
+            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+            " Mode: %s",
+            header, selecttitlename, modename
+        );
+
         switch (get_key()) {
             case SCE_CTRL_CROSS:
                 if (mode == 0)
@@ -209,63 +217,76 @@ begin:
 
         inject:
           psvDebugScreenClear( COLOR_BLACK );
-          printf(vari);
-          printf(" -----------------\n\n");
-          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
-          snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
-          snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(vard, sizeof(vard), " Failed to backup %s\n", title);
-          snprintf(vare, sizeof(vare), " Backing up %s...\n\n", title);
-          snprintf(varf, sizeof(varf), " Installing VitaShell to %s\n Press X to continue\n Press O to go cancel\n\n", title);
-          snprintf(varg, sizeof(varg), " If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/flags/%s.flg", titleid);
-          printf(varf);
+
+          printf(
+            "%s"
+            " Installing VitaShell to %s\n"
+            " Press X to continue\n"
+            " Press O to go cancel\n\n",
+            header, title
+          );
+
           switch (get_key()) {
           	case SCE_CTRL_CIRCLE: {
               goto one;
             }
           }
 
-          sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
+          snprintf(backupDir, sizeof(backupDir), "ux0:data/HBInjector/%s", titleid);
+          snprintf(backupPath, sizeof(backupPath), "%s/eboot.bin", backupDir);
+          snprintf(sysappPath, sizeof(sysappPath), "vs0:app/%s/eboot.bin", titleid);
+          snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/flags/%s.flg", titleid);
+
+          sceIoMkdir(backupDir, 0777);
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
           SceUID fd;
-          if(access(varh, F_OK) != -1) {
-              printf(" VitaShell already installed\n");
-              printf(varg);
-              printf(" Press any key to cancel");
+          if(access(flagPath, F_OK) != -1) {
+              printf(
+                " VitaShell already installed\n"
+                " If it is not, delete ux0:app/HBINJECT0/%s.flg\n"
+                " Press any key to cancel",
+                titleid
+              );
               get_key();
               goto one;
           } else {
-            if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
-              printf(vard);  /* Failed to backup title */
-              printf(" Title likely doesn't exist\n");
-              printf(" Press any key to cancel");
+            if (cp(backupPath, sysappPath) != 0) {
+              printf(
+                " Failed to backup %s\n"
+                " Title likely doesn't exist\n"
+                " Press any key to cancel",
+                title
+              );
               get_key();
               goto one;
             }
             else {
               vshIoUmount(0x300, 0, 0, 0);
               _vshIoMount(0x300, 0, 2, malloc(0x100));
-              printf(vare); /* Backing up title... */
+              printf(" Backing up %s...\n\n", title);
             }
           }
           fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
           if (fd >= 0) {
             printf(" Copying VitaShell to System...\n");
-            sceIoRemove(varc); /* vs0:app/title/eboot.bin */
-            if (cp(varc, "app0:VitaShell.bin") >= 0) { /* vs0:app/title/eboot.bin */
+            sceIoRemove(sysappPath);
+            if (cp(sysappPath, "app0:VitaShell.bin") >= 0) {
               printf(" Copied VitaShell to System\n\n");
             } else {
-              printf(" Failed to copy VitaShell to system\n");
-              printf(" Likely due to vs0 not mounting correctly\n");
-              printf(" Press any key to reboot");
+              printf(
+                " Failed to copy VitaShell to system\n"
+                " Likely due to vs0 not mounting correctly\n"
+                " Press any key to reboot"
+              );
               get_key();
               scePowerRequestColdReset();
               goto end;
             }
           } else {
-            printf(" ERROR: VitaShell not found!\n");
-            printf(" Press any key to reboot");
+            printf(
+                " ERROR: VitaShell not found!\n"
+                " Press any key to reboot"
+            );
             get_key();
             scePowerRequestColdReset();
             goto end;
@@ -275,7 +296,7 @@ begin:
           sceIoRemove("ux0:data/HBInjector/appdb/app.db");
           cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
-          WriteFile(varh, 0, 1); /* app0:titleid.flg */
+          WriteFile(flagPath, 0, 1);
 
           printf(" Press any key to reboot\n\n");
           get_key();
@@ -284,44 +305,52 @@ begin:
 
         restore:
           psvDebugScreenClear( COLOR_BLACK );
-          printf(vari);
-          printf(" -----------------\n\n");
-          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s/eboot.bin", titleid);
-          snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(varc, sizeof(varc), " Restoring %s to system...\n", title);
-          snprintf(vard, sizeof(vard), " Restored %s to system\n\n", title);
-          snprintf(vare, sizeof(vare), " Failed to restore %s to system\n", title);
-          snprintf(varf, sizeof(varf), " ERROR: %s backup not found!\n", title);
-          snprintf(varg, sizeof(varg), " Restoring %s to system\n Press X to continue\n Press O to go cancel\n\n", title);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
-          printf(varg);
+
+          printf(
+            "%s"
+            " Restoring %s to system\n"
+            " Press X to continue\n"
+            " Press O to go cancel\n\n",
+            header, title
+          );
+
           switch (get_key()) {
           	case SCE_CTRL_CIRCLE: {
               goto one;
             }
           }
 
+          snprintf(backupPath, sizeof(backupPath), "ux0:data/HBInjector/%s/eboot.bin", titleid);
+          snprintf(sysappPath, sizeof(sysappPath), "vs0:app/%s/eboot.bin", titleid);
+          snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/%s.flg", titleid);
+
           vshIoUmount(0x300, 0, 0, 0);
           _vshIoMount(0x300, 0, 2, malloc(0x100));
 
           sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-          fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:data/HBInjector/title/eboot.bin */
+          fd = sceIoOpen(backupPath, SCE_O_RDONLY, 0777);
           if (fd >= 0) {
-            printf(varc); /* Restoring title to system... */
-            if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
-              printf(vard); /* Restored title to system */
+            printf(" Restoring %s to system...\n", title);
+            if (cp(sysappPath, backupPath) >= 0) {
+              printf(" Restored %s to system\n\n", title);
             } else {
-              printf(vare); /* Failed to restore title to system */
-              printf(" Likely due to vs0 not mounting correctly\n");
-              printf(" Press any key to reboot");
+              printf(
+                " Failed to restore %s to system\n"
+                " Likely due to vs0 not mounting correctly\n"
+                " Press any key to reboot",
+                title
+              );
               get_key();
               scePowerRequestColdReset();
               goto end;
             }
           } else {
-            printf(varf); /* ERROR: title backup not found! */
-            printf(" Likely due to vs0 not mounting correctly\n");
-            printf(" Press any key to reboot");
+            printf(
+                " ERROR: %s backup not found!\n"
+                " Likely due to vs0 not mounting correctly\n"
+                " Press any key to reboot",
+                title
+            );
             get_key();
             scePowerRequestColdReset();
             goto end;
@@ -331,7 +360,7 @@ begin:
           sceIoRemove("ux0:data/HBInjector/appdb/app.db");
           cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
           sceIoRemove("ur0:shell/db/app.db");
-          sceIoRemove(varh); /* app0:titleid.flg */
+          sceIoRemove(flagPath);
 
           printf(" Press any key to reboot\n\n");
           get_key();
