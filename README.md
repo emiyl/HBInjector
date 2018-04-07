@@ -5,6 +5,7 @@ Replaces System Apps with VitaShell. This stops them being lost when formatting.
 ## Credits
 
 - [gnmmarechal](https://github.com/gnmmarechal/)
+- [StepS-](https://github.com/StepS-)
 - [Icon Source](https://kuvshinov-ilya.deviantart.com/art/--682565941)
 - People on the r/vitahacks Discord Server who helped me
   - [devingDev](https://github.com/devingDev/)
