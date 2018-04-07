@@ -137,7 +137,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
     psvDebugScreenInit();
-    const char *version = ("1.2.5") ;
+    const char *version = ("1.2.6") ;
     const char *titleid = "", *title = "";
     int nTitle = 0;
     int mode = 0;
