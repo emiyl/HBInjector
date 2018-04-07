@@ -12,14 +12,16 @@
 #include <unistd.h>
 #include <errno.h>
 #include "graphics.h"
+
 #define printf psvDebugScreenPrintf
+#define WRAPVAL(v, min, max) (v < min ? max : v > max ? min : v)
 
 int cp(const char *to, const char *from) {
     SceUID fd_to, fd_from;
     char buf[16*1024];
     ssize_t nread;
     int saved_errno;
-	//
+
     fd_from = sceIoOpen(from, SCE_O_RDONLY, 0777);
     if (fd_from < 0)
         return -1;
@@ -60,7 +62,7 @@ int cp(const char *to, const char *from) {
         return 0;
     }
 
-  out_error:
+out_error:
     saved_errno = errno;
 
     sceIoClose(fd_from);
@@ -71,372 +73,304 @@ int cp(const char *to, const char *from) {
     return -1;
 }
 
+static const char* sysTitles[][2] = {
+    {"NPXS10000", "near"},
+    {"NPXS10094", "Parental Controls"},
+    {"NPXS10012", "PS3 Remote Play"},
+    {"NPXS10004", "Photos"},
+    {"NPXS10006", "Friends"},
+    {"NPXS10008", "Trophies"},
+    {"NPXS10009", "Music"},
+    {"NPXS10010", "Video"},
+    {"NPXS10013", "PS4 Link"},
+    {"NPXS10014", "Messages"},
+    {"NPXS10072", "Mail"},
+    {"NPXS10095", "Panoramic Camera"},
+    {"NPXS10091", "Calendar"},
+};
+
+#define TITLEID(n) sysTitles[n][0]
+#define TITLENAME(n) sysTitles[n][1]
+#define TITLEMAX sizeof(sysTitles) / sizeof(sysTitles[0]) - 1
+
 static unsigned buttons[] = {
-	SCE_CTRL_SELECT,
-	SCE_CTRL_START,
-	SCE_CTRL_UP,
-	SCE_CTRL_RIGHT,
-	SCE_CTRL_DOWN,
-	SCE_CTRL_LEFT,
-	SCE_CTRL_LTRIGGER,
-	SCE_CTRL_RTRIGGER,
-	SCE_CTRL_TRIANGLE,
-	SCE_CTRL_CIRCLE,
-	SCE_CTRL_CROSS,
-	SCE_CTRL_SQUARE,
+    SCE_CTRL_SELECT,
+    SCE_CTRL_START,
+    SCE_CTRL_UP,
+    SCE_CTRL_RIGHT,
+    SCE_CTRL_DOWN,
+    SCE_CTRL_LEFT,
+    SCE_CTRL_LTRIGGER,
+    SCE_CTRL_RTRIGGER,
+    SCE_CTRL_TRIANGLE,
+    SCE_CTRL_CIRCLE,
+    SCE_CTRL_CROSS,
+    SCE_CTRL_SQUARE,
 };
 
 int get_key(void) {
-	static unsigned prev = 0;
-	SceCtrlData pad;
-	while (1) {
-		memset(&pad, 0, sizeof(pad));
-		sceCtrlPeekBufferPositive(0, &pad, 1);
-		unsigned new = prev ^ (pad.buttons & prev);
-		prev = pad.buttons;
-		for (int i = 0; i < sizeof(buttons)/sizeof(*buttons); ++i)
-			if (new & buttons[i])
-				return buttons[i];
+    static unsigned prev = 0;
+    SceCtrlData pad;
+    while (1) {
+        memset(&pad, 0, sizeof(pad));
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        unsigned new = prev ^ (pad.buttons & prev);
+        prev = pad.buttons;
+        for (int i = 0; i < sizeof(buttons)/sizeof(*buttons); ++i)
+            if (new & buttons[i])
+                return buttons[i];
 
-		sceKernelDelayThread(1000); // 1s
-	}
+        sceKernelDelayThread(1000); // 1s
+    }
 }
 
 int WriteFile(char *file, void *buf, int size) {
-	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
-	if (fd < 0)
-		return fd;
+    SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+    if (fd < 0)
+        return fd;
 
-	int written = sceIoWrite(fd, buf, size);
+    int written = sceIoWrite(fd, buf, size);
 
-	sceIoClose(fd);
-	return written;
+    sceIoClose(fd);
+    return written;
 }
 
 int main(int argc, char *argv[]) {
-	psvDebugScreenInit();
-  const char *version = ("1.2.5") ;
-  char *titleid = (char *) malloc(100);
-  char *title = (char *) malloc(100);
-  char *selecttitlename = (char *) malloc(100);
-  char *modename = (char *) malloc(100);
-  int selecttitle = 0;
-  int mode = 0;
-  char vara[255], varb[255], varc[255], vard[255], vare[255], varf[255], varg[255], varh[255], vari[255], vary[255];
-  sceIoMkdir("ux0:data/HBInjector", 0777);
-  sceIoMkdir("ux0:data/HBInjector/flags", 0777);
-begin:
-  psvDebugScreenClear( COLOR_BLACK );
-  snprintf(vari, sizeof(vari), "\n HBInjector v%s\n", version);
-  printf(vari);
-  printf(" -----------------\n\n");
-	printf(" This will replace a system application with VitaShell\n");
-	printf(" Backups will be stored in ux0:data/HBInjector\n");
-	printf(" Icon layout will be reset\n\n");
-	printf(" The system application selected will not be able to be\n used for its original purpose until you restore it\n\n");
-  printf(" If you are looking to install this before updating Enso on\n 3.65, remember that when updating all system apps are\n reset to stock, including HBInjected Applications\n\n");
-	printf(" Press X to continue\n");
-	printf(" Press O to exit\n");
+    psvDebugScreenInit();
+    const char *version = ("1.2.5") ;
+    const char *titleid = "", *title = "";
+    int nTitle = 0;
+    int mode = 0;
+    char header[255];
+    char backupDir[255], backupPath[255], sysappPath[255], flagPath[255];
+    sceIoMkdir("ux0:data/HBInjector", 0777);
+    sceIoMkdir("ux0:data/HBInjector/flags", 0777);
 
-  switch (get_key()) {
+    psvDebugScreenClear( COLOR_BLACK );
+    snprintf(header, sizeof(header), "\n HBInjector v%s\n -----------------\n\n", version);
+    printf("%s%s",
+        header,
+        " This will replace a system application with VitaShell\n"
+        " Backups will be stored in ux0:data/HBInjector\n"
+        " Icon layout will be reset\n"
+        "\n"
+        " The system application selected will not be able to be\n"
+        " used for its original purpose until you restore it\n"
+        "\n"
+        " If you are looking to install this before updating Enso on\n"
+        " 3.65, remember that when updating all system apps are\n"
+        " reset to stock, including HBInjected Applications\n"
+        "\n"
+        " Press X to continue\n"
+        " Press O to exit\n"
+    );
+
+    while(1) switch (get_key()) {
     case SCE_CTRL_CROSS:
-      one:
+one:
         psvDebugScreenClear( COLOR_BLACK );
-        printf(vari);
-        printf(" -----------------\n\n");
-        if (selecttitle == 0) {
-          strcpy(selecttitlename, "near");
-          strcpy(titleid, "NPXS10000");
-          strcpy(title, selecttitlename);
-        } else {
-          if (selecttitle == 1) {
-            strcpy(selecttitlename, "Parental Controls");
-            strcpy(titleid, "NPXS10094");
-            strcpy(title, selecttitlename);
-          } else {
-            if (selecttitle == 2) {
-              strcpy(selecttitlename, "PS3 Remote Play");
-              strcpy(titleid, "NPXS10012");
-              strcpy(title, selecttitlename);
-            } else {
-              if (selecttitle == 3) {
-                strcpy(selecttitlename, "Photos");
-                strcpy(titleid, "NPXS10004");
-                strcpy(title, selecttitlename);
-              } else {
-                if (selecttitle == 4) {
-                  strcpy(selecttitlename, "Friends");
-                  strcpy(titleid, "NPXS10006");
-                  strcpy(title, selecttitlename);
-                } else {
-                  if (selecttitle == 5) {
-                    strcpy(selecttitlename, "Trophies");
-                    strcpy(titleid, "NPXS10008");
-                    strcpy(title, selecttitlename);
-                  } else {
-                    if (selecttitle == 6) {
-                      strcpy(selecttitlename, "Music");
-                      strcpy(titleid, "NPXS10009");
-                      strcpy(title, selecttitlename);
-                    } else {
-                      if (selecttitle == 7) {
-                        strcpy(selecttitlename, "Video");
-                        strcpy(titleid, "NPXS10010");
-                        strcpy(title, selecttitlename);
-                      } else {
-                        if (selecttitle == 8) {
-                          strcpy(selecttitlename, "PS4 Link");
-                          strcpy(titleid, "NPXS10013");
-                          strcpy(title, selecttitlename);
-                        } else {
-                          if (selecttitle == 9) {
-                            strcpy(selecttitlename, "Messages");
-                            strcpy(titleid, "NPXS10014");
-                            strcpy(title, selecttitlename);
-                          } else {
-                            if (selecttitle == 10) {
-                              strcpy(selecttitlename, "Mail");
-                              strcpy(titleid, "NPXS10072");
-                              strcpy(title, selecttitlename);
-                            } else {
-                              if (selecttitle == 11) {
-                                strcpy(selecttitlename, "Panoramic Camera");
-                                strcpy(titleid, "NPXS10095");
-                                strcpy(title, selecttitlename);
-                              } else {
-                                if (selecttitle == 12) {
-                                  strcpy(selecttitlename, "Calendar");
-                                    strcpy(titleid, "NPXS10091");
-                                    strcpy(title, selecttitlename);
-                                } else {
-                                  if (selecttitle < 0) {
-                                    selecttitle = 12;
-                                    strcpy(selecttitlename, "Calendar");
-                                    strcpy(titleid, "NPXS10091");
-                                    strcpy(title, selecttitlename);
-                                  }
-                                  else {
-                                    if (selecttitle > 12) {
-                                      selecttitle = 0;
-                                      strcpy(selecttitlename, "near");
-                                      strcpy(titleid, "NPXS10000");
-                                      strcpy(title, selecttitlename);
-                                    }
-                                    else {
-                                      strcpy(selecttitlename, "Unknown Title");
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        printf(" Select Title:\n\n");
-        printf(" < ");
-        printf(selecttitlename);
-        printf(" >\n\n");
-        printf(" Use the D-Pad to select a title\n Use the L and R buttons to change the mode");
 
-        if (mode == 0) {
-          strcpy(modename, "Inject ");
-        } else {
-          if (mode == 1) {
-            strcpy(modename, "Restore");
-          } else {
-            if (mode < 0) {
-              mode = 1;
-              strcpy(modename, "Restore");
-            }
-            else {
-              if (mode > 1) {
-                mode = 0;
-                strcpy(modename, "Inject ");
-              }
-              else
-                strcpy(modename, "Unknown Mode");
-            }
-          }
-        }
-        snprintf(vary, sizeof(vary), "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Mode: %s", modename);
-        printf(vary);
-        switch (get_key()) {
-        	case SCE_CTRL_CROSS: {
+        title = TITLENAME(nTitle);
+        titleid = TITLEID(nTitle);
+
+        printf(
+            " %s"
+            " Select Title:\n\n"
+            " < %s >\n\n"
+            " Use the D-Pad to select a title\n"
+            " Use the L and R buttons to change the mode\n"
+            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+            " Mode: %s",
+            header, title, mode == 0 ? "Inject" : "Restore"
+        );
+
+        while(1) switch (get_key()) {
+        case SCE_CTRL_CROSS:
             if (mode == 0)
-              goto inject;
-            else {
-              if (mode == 1)
-                goto restore;
-              else
                 goto inject;
-            }
-          }
-        	case SCE_CTRL_RIGHT: {
-            selecttitle = selecttitle + 1;
-            goto one;
-          }
-        	case SCE_CTRL_LEFT: {
-            selecttitle = selecttitle - 1;
-            goto one;
-          }
-          case SCE_CTRL_RTRIGGER: {
-            mode = mode + 1;
-            goto one;
-          }
-          case SCE_CTRL_LTRIGGER: {
-            mode = mode - 1;
-            goto one;
-          }
-          default:
-            goto one;
-      	}
-        goto one;
+            else
+                goto restore;
+            break;
 
-        inject:
-          psvDebugScreenClear( COLOR_BLACK );
-          printf(vari);
-          printf(" -----------------\n\n");
-          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s", titleid);
-          snprintf(varb, sizeof(varb), "ux0:/data/HBInjector/%s/eboot.bin", titleid);
-          snprintf(varc, sizeof(varc), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(vard, sizeof(vard), " Failed to backup %s\n", title);
-          snprintf(vare, sizeof(vare), " Backing up %s...\n\n", title);
-          snprintf(varf, sizeof(varf), " Installing VitaShell to %s\n Press X to continue\n Press O to go cancel\n\n", title);
-          snprintf(varg, sizeof(varg), " If it is not, delete ux0:app/HBINJECT0/%s.flg\n", titleid);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/flags/%s.flg", titleid);
-          printf(varf);
-          switch (get_key()) {
-          	case SCE_CTRL_CIRCLE: {
-              goto one;
-            }
-          }
+        case SCE_CTRL_RIGHT:
+            nTitle = WRAPVAL(nTitle+1, 0, TITLEMAX);
+            goto one;
 
-          sceIoMkdir(vara, 0777);  /* ux0:data/HBInjector/title */
-          sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-          SceUID fd;
-          if(access(varh, F_OK) != -1) {
-              printf(" VitaShell already installed\n");
-              printf(varg);
-              printf(" Press any key to cancel");
-              get_key();
-              goto one;
-          } else {
-            if (cp(varb, varc) != 0) { /* ux0:/data/HBInjector/title/eboot.bin, vs0:app/title/eboot.bin */
-              printf(vard);  /* Failed to backup title */
-              printf(" Title likely doesn't exist\n");
-              printf(" Press any key to cancel");
-              get_key();
-              goto one;
+        case SCE_CTRL_LEFT:
+            nTitle = WRAPVAL(nTitle-1, 0, TITLEMAX);
+            goto one;
+
+        case SCE_CTRL_RTRIGGER:
+        case SCE_CTRL_LTRIGGER:
+            mode = !mode;
+            goto one;
+        }
+
+inject:
+        psvDebugScreenClear( COLOR_BLACK );
+
+        printf(
+            "%s"
+            " Installing VitaShell to %s\n"
+            " Press X to continue\n"
+            " Press O to go cancel\n\n",
+            header, title
+        );
+
+        while (1) {
+            switch(get_key()) {
+                case SCE_CTRL_CROSS:
+                    break;
+                case SCE_CTRL_CIRCLE:
+                    goto one;
+                default:
+                    continue;
+            }
+            break;
+        }
+
+        snprintf(backupDir, sizeof(backupDir), "ux0:data/HBInjector/%s", titleid);
+        snprintf(backupPath, sizeof(backupPath), "%s/eboot.bin", backupDir);
+        snprintf(sysappPath, sizeof(sysappPath), "vs0:app/%s/eboot.bin", titleid);
+        snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/flags/%s.flg", titleid);
+
+        sceIoMkdir(backupDir, 0777);
+        sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
+        SceUID fd;
+        if (access(flagPath, F_OK) != -1) {
+            printf(
+                " VitaShell is already installed\n"
+                " If not, delete %s\n"
+                " Press any key to cancel",
+                flagPath
+            );
+            get_key();
+            goto one;
+        }
+        else {
+            if (cp(backupPath, sysappPath) != 0) {
+                printf(
+                    " Failed to backup %s\n"
+                    " Title likely doesn't exist\n"
+                    " Press any key to cancel",
+                    title
+                );
+                get_key();
+                goto one;
             }
             else {
-              vshIoUmount(0x300, 0, 0, 0);
-              _vshIoMount(0x300, 0, 2, malloc(0x100));
-              printf(vare); /* Backing up title... */
+                vshIoUmount(0x300, 0, 0, 0);
+                _vshIoMount(0x300, 0, 2, malloc(0x100));
+                printf(" Backing up %s...\n\n", title);
             }
-          }
-          fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
-          if (fd >= 0) {
+        }
+        fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
+        if (fd >= 0) {
             printf(" Copying VitaShell to System...\n");
-            sceIoRemove(varc); /* vs0:app/title/eboot.bin */
-            if (cp(varc, "app0:VitaShell.bin") >= 0) { /* vs0:app/title/eboot.bin */
-              printf(" Copied VitaShell to System\n\n");
-            } else {
-              printf(" Failed to copy VitaShell to system\n");
-              printf(" Likely due to vs0 not mounting correctly\n");
-              printf(" Press any key to reboot");
-              get_key();
-              scePowerRequestColdReset();
-              goto end;
+            sceIoRemove(sysappPath);
+            if (cp(sysappPath, "app0:VitaShell.bin") >= 0)
+                printf(" Copied VitaShell to System\n\n");
+            else {
+                printf(
+                    " Failed to copy VitaShell to system\n"
+                    " Likely due to vs0 not mounting correctly\n"
+                    " Press any key to reboot"
+                );
+                get_key();
+                goto end;
             }
-          } else {
-            printf(" ERROR: VitaShell not found!\n");
-            printf(" Press any key to reboot");
+        }
+        else {
+            printf(
+                " ERROR: VitaShell not found!\n"
+                " Press any key to reboot"
+            );
             get_key();
-            scePowerRequestColdReset();
             goto end;
-          }
+        }
 
-          printf(" Rebuilding database...\n\n");
-          sceIoRemove("ux0:data/HBInjector/appdb/app.db");
-          cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
-          sceIoRemove("ur0:shell/db/app.db");
-          WriteFile(varh, 0, 1); /* app0:titleid.flg */
+        printf(" Rebuilding database...\n\n");
+        sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+        cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
+        sceIoRemove("ur0:shell/db/app.db");
+        WriteFile(flagPath, 0, 1);
 
-          printf(" Press any key to reboot\n\n");
-          get_key();
-          scePowerRequestColdReset();
-          goto end;
+        printf(" Press any key to reboot\n\n");
+        get_key();
+        goto end;
 
-        restore:
-          psvDebugScreenClear( COLOR_BLACK );
-          printf(vari);
-          printf(" -----------------\n\n");
-          snprintf(vara, sizeof(vara), "ux0:data/HBInjector/%s/eboot.bin", titleid);
-          snprintf(varb, sizeof(varb), "vs0:app/%s/eboot.bin", titleid);
-          snprintf(varc, sizeof(varc), " Restoring %s to system...\n", title);
-          snprintf(vard, sizeof(vard), " Restored %s to system\n\n", title);
-          snprintf(vare, sizeof(vare), " Failed to restore %s to system\n", title);
-          snprintf(varf, sizeof(varf), " ERROR: %s backup not found!\n", title);
-          snprintf(varg, sizeof(varg), " Restoring %s to system\n Press X to continue\n Press O to go cancel\n\n", title);
-          snprintf(varh, sizeof(varh), "ux0:data/HBInjector/%s.flg", titleid);
-          printf(varg);
-          switch (get_key()) {
-          	case SCE_CTRL_CIRCLE: {
-              goto one;
+restore:
+        psvDebugScreenClear( COLOR_BLACK );
+
+        printf(
+            "%s"
+            " Restoring %s to system\n"
+            " Press X to continue\n"
+            " Press O to go cancel\n\n",
+            header, title
+        );
+
+        while (1) {
+            switch(get_key()) {
+                case SCE_CTRL_CROSS:
+                    break;
+                case SCE_CTRL_CIRCLE:
+                    goto one;
+                default:
+                    continue;
             }
-          }
+            break;
+        }
 
-          vshIoUmount(0x300, 0, 0, 0);
-          _vshIoMount(0x300, 0, 2, malloc(0x100));
+        snprintf(backupPath, sizeof(backupPath), "ux0:data/HBInjector/%s/eboot.bin", titleid);
+        snprintf(sysappPath, sizeof(sysappPath), "vs0:app/%s/eboot.bin", titleid);
+        snprintf(flagPath, sizeof(flagPath), "ux0:data/HBInjector/flags/%s.flg", titleid);
 
-          sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
-          fd = sceIoOpen(vara, SCE_O_RDONLY, 0777); /* ux0:data/HBInjector/title/eboot.bin */
-          if (fd >= 0) {
-            printf(varc); /* Restoring title to system... */
-            if (cp(varb, vara) >= 0) { /* vs0:app/title/eboot.bin */ /* ux0:/data/HBInjector/title/eboot.bin */
-              printf(vard); /* Restored title to system */
-            } else {
-              printf(vare); /* Failed to restore title to system */
-              printf(" Likely due to vs0 not mounting correctly\n");
-              printf(" Press any key to reboot");
-              get_key();
-              scePowerRequestColdReset();
-              goto end;
+        vshIoUmount(0x300, 0, 0, 0);
+        _vshIoMount(0x300, 0, 2, malloc(0x100));
+
+        sceIoMkdir("ux0:data/HBInjector/appdb", 0777);
+        fd = sceIoOpen(backupPath, SCE_O_RDONLY, 0777);
+        if (fd >= 0) {
+            printf(" Restoring %s to system...\n", title);
+            if (cp(sysappPath, backupPath) >= 0)
+                printf(" Restored %s to system\n\n", title);
+            else {
+                printf(
+                    " Failed to restore %s to system\n"
+                    " Likely due to vs0 not mounting correctly\n"
+                    " Press any key to reboot",
+                    title
+                );
+                get_key();
+                goto end;
             }
-          } else {
-            printf(varf); /* ERROR: title backup not found! */
-            printf(" Likely due to vs0 not mounting correctly\n");
-            printf(" Press any key to reboot");
+        } else {
+            printf(
+                " ERROR: %s backup not found!\n"
+                " Likely due to vs0 not mounting correctly\n"
+                " Press any key to reboot",
+                title
+            );
             get_key();
-            scePowerRequestColdReset();
             goto end;
-          }
+        }
 
-          printf(" Rebuilding database...\n\n");
-          sceIoRemove("ux0:data/HBInjector/appdb/app.db");
-          cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
-          sceIoRemove("ur0:shell/db/app.db");
-          sceIoRemove(varh); /* app0:titleid.flg */
+        printf(" Rebuilding database...\n\n");
+        sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+        cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
+        sceIoRemove("ur0:shell/db/app.db");
+        sceIoRemove(flagPath);
 
-          printf(" Press any key to reboot\n\n");
-          get_key();
-          scePowerRequestColdReset();
-          goto end;
+        printf(" Press any key to reboot\n\n");
+        get_key();
+        goto end;
+
     case SCE_CTRL_CIRCLE:
-      sceKernelExitProcess(0);
-    default: {
-      goto begin;
+        sceKernelExitProcess(0);
+        break;
     }
-  }
 end:
-  scePowerRequestColdReset();
-/* quit:
-  sceKernelExitProcess(0); */
+    scePowerRequestColdReset();
+    return 0;
 }
