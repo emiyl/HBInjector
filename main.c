@@ -16,6 +16,7 @@
 #define printf psvDebugScreenPrintf
 /* Why Emily wants this, I have no idea, it's her fault. */
 #define begone sceIoRemove
+/* holy shit i was kidding lmao */
 #define WRAPVAL(v, min, max) (v < min ? max : v > max ? min : v)
 
 int cp(const char *to, const char *from) {
