@@ -14,6 +14,8 @@
 #include "graphics.h"
 
 #define printf psvDebugScreenPrintf
+/* Why Emily wants this, I have no idea, it's her fault. */
+#define begone sceIoRemove
 #define WRAPVAL(v, min, max) (v < min ? max : v > max ? min : v)
 
 int cp(const char *to, const char *from) {
@@ -267,7 +269,7 @@ inject:
         fd = sceIoOpen("app0:VitaShell.bin", SCE_O_RDONLY, 0777);
         if (fd >= 0) {
             printf(" Copying VitaShell to System...\n");
-            sceIoRemove(sysappPath);
+            begone(sysappPath);
             if (cp(sysappPath, "app0:VitaShell.bin") >= 0)
                 printf(" Copied VitaShell to System\n\n");
             else {
@@ -290,9 +292,9 @@ inject:
         }
 
         printf(" Rebuilding database...\n\n");
-        sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+        begone("ux0:data/HBInjector/appdb/app.db");
         cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
-        sceIoRemove("ur0:shell/db/app.db");
+        begone("ur0:shell/db/app.db");
         WriteFile(flagPath, 0, 1);
 
         printf(" Press any key to reboot\n\n");
@@ -357,10 +359,10 @@ restore:
         }
 
         printf(" Rebuilding database...\n\n");
-        sceIoRemove("ux0:data/HBInjector/appdb/app.db");
+        begone("ux0:data/HBInjector/appdb/app.db");
         cp("ux0:data/HBInjector/appdb/app.db", "ur0:shell/db/app.db");
-        sceIoRemove("ur0:shell/db/app.db");
-        sceIoRemove(flagPath);
+        begone("ur0:shell/db/app.db");
+        begone(flagPath);
 
         printf(" Press any key to reboot\n\n");
         get_key();
