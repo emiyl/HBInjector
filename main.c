@@ -140,7 +140,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
     psvDebugScreenInit();
-    const char *version = ("1.2.6") ;
+    const char *version = ("1.2.6r2") ;
     const char *titleid = "", *title = "";
     int nTitle = 0;
     int mode = 0;
@@ -150,10 +150,10 @@ int main(int argc, char *argv[]) {
     sceIoMkdir("ux0:data/HBInjector/flags", 0777);
 
     psvDebugScreenClear( COLOR_BLACK );
-    snprintf(header, sizeof(header), "\n HBInjector v%s\n -----------------\n\n", version);
+    snprintf(header, sizeof(header), "\n HBInjector v%s (updated by guts)\n -----------------\n\n", version);
     printf("%s%s",
         header,
-        " This will replace a system application with VitaShell\n"
+        " This will replace a system application with VitaShell 2.02\n"
         " Backups will be stored in ux0:data/HBInjector\n"
         " Icon layout will be reset\n"
         "\n"
